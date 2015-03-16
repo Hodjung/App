@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Start"
+        android:id="@+id/start"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true" />
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Back 1 step"
+        android:id="@+id/backStep"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true" />
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Light"
+        android:id="@+id/light"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true" />
+
+    <RelativeLayout
+        android:background="@drawable/map_layout"
+        android:id="@+id/layout"
+        android:layout_width="400px"
+        android:layout_height="400px"
+        android:layout_centerInParent="true"></RelativeLayout>
+
+</RelativeLayout>

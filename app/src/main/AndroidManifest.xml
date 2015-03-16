@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.kridsadath.app" >
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-feature android:name="android.hardware.bluetooth_le" android:required="true"/>
+    <application
+        android:allowBackup="true"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme" >
+        <activity
+            android:name=".MainActivity"
+            android:label="@string/app_name" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:label="@string/app_name" android:name=".initial_page"/>
+        <activity android:label="@string/app_name" android:name=".create_page"/>
+        <activity android:label="@string/app_name" android:name=".manage_floor"/>
+        <activity android:label="@string/app_name" android:name=".config_room"/>
+        <activity android:label="@string/app_name" android:name=".record_page"/>
+        <activity android:label="@string/app_name" android:name=".scan_ble"/>
+        <activity android:label="@string/app_name" android:name=".place_page"/>
+        <activity android:label="@string/app_name" android:name=".menu_ble"/>
+    </application>
+
+</manifest>
