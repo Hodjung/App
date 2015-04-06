@@ -6,9 +6,11 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,7 +20,7 @@ import java.util.List;
 public class DrawLine  {
     private int STICK_ALPHA = 200;
     private int LAYOUT_ALPHA = 200;
-    private boolean isPoint;
+    private boolean isPoint,textRange;
     private Context mContext;
     private ViewGroup mLayout;
     private ViewGroup.LayoutParams params;
@@ -32,6 +34,7 @@ public class DrawLine  {
     public DrawLine (Context context, ViewGroup layout) {
         mContext = context;
         isPoint=true;
+        textRange=false;
         draw = new DrawCanvas(mContext);
         paint = new Paint();
         paint.setColor(Color.BLACK);
@@ -47,6 +50,9 @@ public class DrawLine  {
         this.y.add(y);
         this.realX.add(realX);
         this.realY.add(realY);
+    }
+    public void setTextRange(boolean a){
+        this.textRange=a;
     }
     public void remove_last_point(){
         if (x.size()>0) {
@@ -95,6 +101,7 @@ public class DrawLine  {
         } catch (Exception e) { }
         mLayout.addView(draw);
     }
+
     private class DrawCanvas extends View {
         private DrawCanvas(Context mContext) {
             super(mContext);
@@ -109,7 +116,15 @@ public class DrawLine  {
                     paint.setStrokeWidth(5);
                     canvas.drawLine(realX.get(i), realY.get(i), realX.get(i + 1), realY.get(i + 1), paint);
                 }
-                canvas.drawText(""+i,realX.get(i),realY.get(i),paint);
+                if (i==0&&textRange) {
+                    DecimalFormat df=new DecimalFormat("0.00");
+                    double dX=(realX.get(i)-50)/25-(realX.get(i+1)-50)/25;
+                    double dY=(realY.get(i)-50)/25-(realY.get(i+1)-50)/25;
+                    double range=Math.sqrt((dX * dX) + (dY * dY));
+                    paint.setTextSize(20);
+                    Log.d(""+range+" "+dX+" "+dY+" "+x.get(i)+" "+x.get(i+1)+" "+y.get(i)+" "+y.get(i+1),"checkLog");
+                    canvas.drawText("" + df.format(range) + " m", realX.get(i), realY.get(i), paint);
+                }
             }
 
         }

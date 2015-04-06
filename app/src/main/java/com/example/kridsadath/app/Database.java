@@ -98,10 +98,12 @@ final class Database extends SQLiteOpenHelper {
                 " INTEGER,"+KEY_DETAIL+" TEXT,"+KEY_X+" FLOAT,"+KEY_Y+" FLOAT)";
         db.execSQL(CREATE_PIN_TABLE);
 
-
+        String CREATE_NEAR_CORNER_TABLE="CREATE TABLE IF NOT EXISTS nearCorners(id INTEGER PRIMARY KEY AUTOINCREMENT,roomId INTEGER,noCorner INTEGER,macAddress TEXT)";
+        db.execSQL(CREATE_NEAR_CORNER_TABLE);
 
         /*db.execSQL("INSERT INTO "+ TABLE_PLACES +" (" + KEY_PLACE + ", " + KEY_FLOOR
                 + ") VALUES ('Fudge', 95, 750);");*/
+        Log.d("Finish on Create Database","checkLog");
     }
 
     // Upgrading database
@@ -116,8 +118,18 @@ final class Database extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_CORNERS);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_DOORS);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_PINS);
+        db.execSQL("DROP TABLE IF EXISTS nearCorners");
         // Create tables again
         onCreate(db);
+    }
+    void addNearCorner(nearCorner nearCorner){
+        ContentValues values = new ContentValues();
+        values.put("roomId",nearCorner.getRoomId());
+        values.put("noCorner",nearCorner.getNoCorner());
+        values.put("macAddress",nearCorner.getMacId());
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.insert("nearCorner",null,values);
+        db.close();
     }
     int addPin(int roomId,String detail,float x,float y){
         int id=0;
@@ -131,10 +143,10 @@ final class Database extends SQLiteOpenHelper {
         db.close();
         return id;
     }
-    void deletePin(int pinId) {
+    void deletePin(int roomId) {
         SQLiteDatabase db = this.getWritableDatabase();
-        db.delete(TABLE_PINS, KEY_ID + " = ?",
-                new String[] { String.valueOf(pinId) });
+        db.delete(TABLE_PINS, "roomId" + " = ?",
+                new String[] { String.valueOf(roomId) });
         db.close();
     }
     public List<pin> getPin(int roomId){
@@ -142,10 +154,11 @@ final class Database extends SQLiteOpenHelper {
         List<pin> list=null;
         String selectQuery = "SELECT * FROM "+TABLE_PINS+" WHERE "+KEY_ROOM_ID+"=?";
         Cursor cursor = db.rawQuery(selectQuery,new String[]{String.valueOf(roomId)});
+
         if (cursor.moveToFirst()){
             list=new ArrayList<pin>();
             do {
-                list.add(new pin(cursor.getString(2),Integer.parseInt(cursor.getString(3)),Integer.parseInt(cursor.getString(4))));
+                list.add(new pin(Integer.parseInt(cursor.getString(1)),cursor.getString(2),Float.parseFloat(cursor.getString(3)),Float.parseFloat(cursor.getString(4))));
             }while(cursor.moveToNext());
         }
         return list;
@@ -206,7 +219,10 @@ final class Database extends SQLiteOpenHelper {
         if (cursor.moveToFirst()){
             list=new ArrayList<corner>();
             do {
-                list.add(new corner(Integer.parseInt(cursor.getString(1)),Integer.parseInt(cursor.getString(3)),Integer.parseInt(cursor.getString(4))));
+                list.add(new corner(Integer.parseInt(cursor.getString(1))));
+                list.get(list.size()-1).setNoCorner(Integer.parseInt(cursor.getString(2)));
+                list.get(list.size()-1).setX(Integer.parseInt(cursor.getString(3)));
+                list.get(list.size()-1).setY(Integer.parseInt(cursor.getString(4)));
             }while(cursor.moveToNext());
         }
         return list;

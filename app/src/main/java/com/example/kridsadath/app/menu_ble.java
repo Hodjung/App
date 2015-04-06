@@ -9,10 +9,12 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Canvas;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -30,10 +32,10 @@ public class menu_ble extends Activity {
     int roomId , w , h ;
     Database db;
     room currentRoom;
-    DrawLine line;
+    DrawLine line,routeLine;
     float plotX,plotY,oldPlotX,oldPlotY;
     List<DrawInLayout> device;
-    List<ble> listBle,sortedBle;
+    List<ble> listBle;
     Button btn1,btn2,btn3;
     String con;
     int menu;
@@ -41,8 +43,10 @@ public class menu_ble extends Activity {
     List<Integer> listCount;
     List<Integer> listRssi;
     List<corner> listCorner;
-    List<Integer> listDoor;
-    List<Integer> listPin;
+    List<nearCorner> listNearCorner;
+    List<door> listDoor;
+    List<pin> listPin;
+    pin chosenPin;
     List<DrawCircle> listCircle;
     double DISTANCE=1.0; //ระยะทดแทน step ละไม่เกิน 0.5
     double BETWEEN_DEVICE;
@@ -61,6 +65,7 @@ public class menu_ble extends Activity {
     double realX,realY;
     int countN;
     int noCorner;
+    boolean isCorner;
     public menu_ble(){}
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,8 +76,10 @@ public class menu_ble extends Activity {
         con=extras.getString("menu");
         textX=(TextView)findViewById(R.id.x);
         textY=(TextView)findViewById(R.id.y);
-        if (con.equals("corner"))
-            menu=1;
+        isCorner=false;
+        if (con.equals("corner")){
+            isCorner=true;
+            menu=1;}
         else if (con.equals("door"))
             menu=2;
         else if (con.equals("pin"))
@@ -85,9 +92,6 @@ public class menu_ble extends Activity {
             startActivityForResult(enableBtIntent, 1);
         }
         listBle=db.getAllBle(roomId);
-        for (int i=0;i<listBle.size();i++){
-            Log.d(listBle.get(i).getId()+" "+listBle.get(i).getMacId()+" "+listBle.get(i).getRoomId()+" "+listBle.get(i).getPosition(),"checkLog");
-        }
         if (listBle==null){
             Log.d("listBle=null","checkLog");
             AlertDialog.Builder box = new AlertDialog.Builder(this);
@@ -102,6 +106,9 @@ public class menu_ble extends Activity {
             box.show();
         }
         else {
+            for (int i=0;i<listBle.size();i++){
+                Log.d(listBle.get(i).getId()+" "+listBle.get(i).getMacId()+" "+listBle.get(i).getRoomId()+" "+listBle.get(i).getPosition(),"checkLog");
+            }
             countN=0;
             oldX=0;
             oldY=0;
@@ -132,6 +139,7 @@ public class menu_ble extends Activity {
             hLayout = (h * scale) + 100;
             drawDevicePlan();
             line = new DrawLine(this, layout);
+            routeLine = new DrawLine(this,layout);
             btn1=(Button)findViewById(R.id.btn1);
             btn2=(Button)findViewById(R.id.btn2);
             btn3=(Button)findViewById(R.id.btn3);
@@ -150,7 +158,7 @@ public class menu_ble extends Activity {
                 listCircle.add(new DrawCircle(this, layout));
             }
             listCorner=db.getCorner(roomId);
-            if (listCorner!=null){
+            if (listCorner!=null&&menu!=1){
                 for (int i=0;i<listCorner.size();i++){
                     line.add_point(listCorner.get(i).getX(),listCorner.get(i).getY(),
                             (listCorner.get(i).getX()*scale/4)+100,
@@ -159,8 +167,9 @@ public class menu_ble extends Activity {
                 line.drawLine(false);
             }
             switch (menu){
-                case 1: corner();
-                    txt.setText("Add Corner");
+                case 1: //listNearCorner=new ArrayList<nearCorner>();
+                    corner();
+                    txt.setText("Scan Corner");
                     break;
                 case 2: door();
                     txt.setText("Add Door");
@@ -169,7 +178,7 @@ public class menu_ble extends Activity {
                     txt.setText("Add Pin");
                     break;
                 case 4: test();
-                    txt.setText("Test Position");
+                    txt.setText("Position");
                     break;
             }
         }
@@ -183,7 +192,7 @@ public class menu_ble extends Activity {
                 return false;
             }
         });*/
-        noCorner=0;
+        //noCorner=0;
         line.add_point(-2,-2,50,50);
         line.add_point((w-1)*4+2,-2,(w-1)*100+150,50);
         line.add_point((w-1)*4+2,(h-1)*4+2,(w-1)*100+150,(h-1)*100+150);
@@ -191,7 +200,7 @@ public class menu_ble extends Activity {
         line.add_point(-2,-2,50,50);
         line.drawLine(false);
         btn1.setVisibility(View.INVISIBLE);
-        btn1.setText("Scan Corner "+noCorner);
+        /*btn1.setText("Scan Corner "+noCorner);
         btn1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -199,66 +208,69 @@ public class menu_ble extends Activity {
                     btn1.setText("Scanning Corner "+noCorner);
                     btn2.setVisibility(View.VISIBLE);
                     startScan();
+                    new CountDownTimer(30000, 1000) {
+                        public void onTick(long millisUntilFinished) {
+                            textX.setText("seconds remaining: " + millisUntilFinished / 1000);
+                            textY.setText(""+listNearCorner.size());
+                        }
+                        public void onFinish() {
+                            stopScan();
+                            noCorner++;
+                            textY.setText(listNearCorner.size()+"done!");
+                            btn1.setText("Scan Corner "+noCorner);
+                        }
+                    }.start();
+                }
+                else  {
+                    btn1.setText("Scanning Corner "+noCorner);
+                    startScan();
+                    new CountDownTimer(30000, 1000) {
+                        public void onTick(long millisUntilFinished) {
+                            textX.setText("seconds remaining: " + millisUntilFinished / 1000);
+                            textY.setText(""+listNearCorner.size());
+                        }
+                        public void onFinish() {
+                            stopScan();
+                            noCorner++;
+                            textY.setText(listNearCorner.size()+"done!");
+                            if (noCorner==4){
+                                btn1.setVisibility(View.INVISIBLE);
+                            }
+                            else btn1.setText("Scan Corner "+noCorner);
+                        }
+                    }.start();
                 }
             }
-        });
+        });*/
         btn2.setVisibility(View.INVISIBLE);
-        btn2.setText("Back 1 Step");
+        /*btn2.setText("Back 1 Step");
         btn2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (line.getSize() == 0) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(menu_ble.this);
-                    builder.setTitle("Error");
-                    builder.setMessage("Can't Back : No Corner");
-                    builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-
-                        }
-                    });
-                    builder.show();
-                } else {
-                    btn3.setText("Connect");
-                    line.remove_last_point();
-                    line.drawLine(true);
+                noCorner--;
+                btn1.setVisibility(View.VISIBLE);
+                btn1.setText("Scan Corner "+noCorner);
+                for (int i=0;i<listNearCorner.size();i++){
+                    if (listNearCorner.get(i).getNoCorner()==noCorner){
+                        listNearCorner.remove(i);
+                    }
                 }
             }
-        });
-        //btn3.setText("Connect");
+        });*/
         btn3.setText("Confirm");
         btn3.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (btn3.getText() == "Connect") {
-                    if (line.getSize()>2) {
-                        stopScan();
-                        line.add_point(line.getFirstX(), line.getFirstY(),line.getFirstRealX(),line.getFirstRealY());
-                        line.drawLine(true);
-                        btn3.setText("Confirm");
-                    }
-                    else {
-                        AlertDialog.Builder builder=new AlertDialog.Builder(menu_ble.this);
-                        builder.setTitle("Error");
-                        builder.setMessage("Can't Connect : Need more Corner");
-                        builder.setPositiveButton("OK",new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-
-                            }
-                        });
-                        builder.show();
-                    }
+                //Add Corner To Room , Update Room
+                db.deleteCorner(roomId);
+                for (int i=0;i<line.getSize();i++){
+                    int id=db.addCorner(roomId,i,line.getX(i),line.getY(i));
+                    Log.d(id+":"+roomId+" "+i+" "+line.getX(i)+" "+line.getY(i),"checkLog");
                 }
-                else {
-                    //Add Corner To Room , Update Room
-                    db.deleteCorner(roomId);
-                    for (int i=0;i<line.getSize();i++){
-                        int id=db.addCorner(roomId,i,line.getX(i),line.getY(i));
-                        Log.d(id+":"+roomId+" "+i+" "+line.getX(i)+" "+line.getY(i),"checkLog");
-                    }
-                    finish();
-                }
+                /*for (int i=0;i<listNearCorner.size();i++){
+                    db.addNearCorner(listNearCorner.get(i));
+                }*/
+                finish();
             }
         });
     }
@@ -306,7 +318,7 @@ public class menu_ble extends Activity {
             //show Error
             AlertDialog.Builder builder=new AlertDialog.Builder(this);
             builder.setTitle("Error");
-            builder.setMessage("Need corner");
+            builder.setMessage("Scan Corner");
             builder.setPositiveButton("OK",new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
@@ -316,24 +328,66 @@ public class menu_ble extends Activity {
             builder.show();
         }
     }
+    void addPin(int roomId,String input){
+        Log.d("x "+drawPinX+" y "+drawPinY,"checkLog");
+        db.addPin(roomId, input, drawPinX, drawPinY);
+    }
+    float drawPinX;
+    float drawPinY;
     void pin(){
+        db.deletePin(roomId);
+        listPin=new ArrayList<pin>();
+        final List<DrawInLayout> pin=new ArrayList<DrawInLayout>();
+
         layout.setOnTouchListener(new View.OnTouchListener() {
             @Override
-            public boolean onTouch(View v, MotionEvent event) {
-
+            public boolean onTouch(final View v, final MotionEvent event) {
+                pin.add(new DrawInLayout(menu_ble.this, layout, R.drawable.pin));
+                pin.get(pin.size() - 1).setLayoutAlpha(100);
+                pin.get(pin.size() - 1).setStickAlpha(100);
+                pin.get(pin.size() - 1).setLayoutSize(wLayout, hLayout);
+                pin.get(pin.size() - 1).setStickSize(20, 20);
+                pin.get(pin.size() - 1).drawPoint((int)event.getX(), (int)event.getY());
+                drawPinX=event.getX();
+                drawPinY=event.getY();
+                /*Log.d((int)event.getX() + " , " + (int)event.getY(),"checkLog");
+                Log.d(event.getRawX() + " , " + event.getRawY(),"checkLog");
+                Log.d(v.getScaleX() + " , " + v.getScaleY(),"checkLog");
+                Log.d(v.getX() + " , " + v.getY(), "checkLog");*/
+                final AlertDialog.Builder builder=new AlertDialog.Builder(menu_ble.this);
+                final EditText input = new EditText(menu_ble.this);
+                builder.setTitle("Set Detail");
+                builder.setView(input);
+                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        addPin(roomId, input.getText().toString());
+                    }
+                });
+                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        pin.get(pin.size()-1).delete();
+                        pin.remove(pin.size()-1);
+                    }
+                });
+                new CountDownTimer(1000, 1000) {
+                    public void onTick(long millisUntilFinished) {
+                    }
+                    public void onFinish() {
+                        builder.show();
+                    }
+                }.start();
                 return false;
             }
         });
-        final List<DrawInLayout> pin=new ArrayList<DrawInLayout>();
         btn1.setVisibility(View.INVISIBLE);
-        btn1.setText("Start Scan");
+        btn2.setVisibility(View.INVISIBLE);
+        /*btn1.setText("Add Pin");
         btn1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (btn1.getText() == "Start Scan") {
-                    startScan();
-                    btn1.setText("Add Pin");
-                } else {
+                if (btn1.getText().equals("Add Pin")) {
                     pin.add(new DrawInLayout(menu_ble.this, layout, R.drawable.pin));
                     pin.get(pin.size() - 1).setLayoutAlpha(100);
                     pin.get(pin.size() - 1).setStickAlpha(100);
@@ -343,8 +397,8 @@ public class menu_ble extends Activity {
                     //db.addPin(roomId, "Detail", (float)oldX, (float)oldY);
                 }
             }
-        });
-        btn2.setText("Remove");
+        });*/
+        /*btn2.setText("Remove");
         btn2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -353,39 +407,87 @@ public class menu_ble extends Activity {
                     pin.remove(pin.size()-1);
                 }
             }
-        });
+        });*/
         btn3.setText("Confirm");
         btn3.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                stopScan();
-                for (int i=0;i<pin.size();i++){
-                    //add pin to database
-                }
                 finish();
             }
         });
     }
     void test(){
+        final List<DrawInLayout> pin=new ArrayList<DrawInLayout>();
+        chosenPin=null;
+        listPin=null;
+        listPin=db.getPin(roomId);
+        if (listPin!=null){
+            for (int i=0;i<listPin.size();i++){
+                pin.add(new DrawInLayout(menu_ble.this, layout, R.drawable.pin));
+                pin.get(pin.size() - 1).setLayoutAlpha(100);
+                pin.get(pin.size() - 1).setStickAlpha(100);
+                pin.get(pin.size() - 1).setLayoutSize(wLayout, hLayout);
+                pin.get(pin.size() - 1).setStickSize(20, 20);
+                Log.d("pin " + listPin.get(i).getX() + " " + listPin.get(i).getY(), "checkLog");
+                pin.get(pin.size() - 1).drawPoint(listPin.get(i).getX(), listPin.get(i).getY());
+            }
+        }
+        btn1.setVisibility(View.VISIBLE);
         btn1.setText("Start");
         btn1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (btn1.getText()=="Start"){
+                if (btn1.getText() == "Start") {
                     btn1.setText("Stop");
                     startScan();
-                }
-                else {
+                } else {
                     btn1.setText("Start");
-                    for (int i=0;i<listBle.size();i++){
-                        listCount.set(i,0);
-                        listRssi.set(i,-100);
+                    for (int i = 0; i < listBle.size(); i++) {
+                        listCount.set(i, 0);
+                        listRssi.set(i, -100);
                     }
                     stopScan();
                 }
             }
         });
-        btn2.setVisibility(View.INVISIBLE);
+        //btn2.setVisibility(View.INVISIBLE);
+        btn2.setText("Route Pin");
+        btn2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (pin.size()==0){
+                    AlertDialog.Builder builder=new AlertDialog.Builder(menu_ble.this);
+                    builder.setTitle("Error");
+                    builder.setMessage("Don't have pin to route");
+                    builder.setPositiveButton("OK",new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+
+                        }
+                    });
+                    builder.show();
+                }
+                else {
+                    final CharSequence[] items = new CharSequence[listPin.size()];
+                    for (int i = 0; i < listPin.size(); i++) {
+                        items[i] = listPin.get(i).getDetail();
+                    }
+
+                    AlertDialog.Builder builder=new AlertDialog.Builder(menu_ble.this);
+                    builder.setTitle("Select Pin");
+                    builder.setItems(items, new DialogInterface.OnClickListener() {
+                        //TODO
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            chosenPin=listPin.get(which);
+                            userRoute();
+                        }
+                    });
+                    builder.show();
+
+                }
+            }
+        });
         btn3.setText("Back");
         btn3.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -415,16 +517,44 @@ public class menu_ble extends Activity {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {//HMSoft
-                    if (device.getName().equals("UT9")) {
-                        check(device.getAddress(), rssi);
-                        //Log.d(device.getName()+""+rssi,"checkLog");
+                    if (device.getName()!=null) {
+                        if (isCorner) {
+                            if (device.getName().equals("UT9")) {
+                                addNearlyDevice(device.getAddress());
+                            }
+                        } else {
+                            if (device.getName().equals("UT9")) {
+                                check(device.getAddress(), rssi);
+                                //Log.d(device.getName()+""+rssi,"checkLog");
+                            }
+                            //else Log.d(device.getName()+"","checkLog");
+                            userWalk();
+                        }
                     }
-                    //else Log.d(device.getName()+"","checkLog");
-                    userWalk();
                 }
             });
         }
     };
+    public void addNearlyDevice(String macId){
+        int i;
+        for (i=0;i<listBle.size();i++){
+            Log.d(macId+" == "+listBle.get(i).getMacId(),"checkLog");
+            if (macId.equals(listBle.get(i).getMacId())){
+                break;
+            }
+        }
+        if (i==listBle.size()){
+            int j;
+            for (j=0;j<listNearCorner.size();j++){
+                if (listNearCorner.get(j).getMacId()==macId){
+                    break;
+                }
+            }
+            if (j==listNearCorner.size()) {
+                listNearCorner.add(new nearCorner(roomId,noCorner, macId));
+            }
+        }
+    }
     public void check(String macId,int rssi){
         int p=-1;
         for (int i = 0; i < listBle.size(); i++) {
@@ -518,12 +648,33 @@ public class menu_ble extends Activity {
             }
         }
     }
+    public void userRoute(){
+        int size=routeLine.getSize();
+        for (int i=0;i<size;i++){
+            routeLine.remove_last_point();
+        }
+        if (oldX==0&&oldY==0) {
+            routeLine.add_point(4, 2, 200, 150);
+        }
+        else {
+            routeLine.add_point((float)oldX,(float)oldY,(float) uCurX, (float) uCurY);
+        }
+        float tarX=chosenPin.getX();
+        float tarY=chosenPin.getY();
+        routeLine.add_point((tarX-50)/25,(tarY-50)/25,tarX,tarY);
+        routeLine.setTextRange(true);
+        routeLine.drawLine(false);
+    }
     public void userWalk(){
         if(uTargX>uCurX) uCurX+=0.8;
         else uCurX-=0.8;
         if(uTargY>uCurY) uCurY+=0.8;
         else uCurY-=0.8;
         user.drawPoint((float) uCurX, (float) uCurY);
+        //TODO:Add user route
+        if (chosenPin!=null){
+            userRoute();
+        }
     }
     public void position(int a,int b,int c,int d){
         double da,db,dc,dd;

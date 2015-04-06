@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Display;
@@ -44,16 +45,19 @@ public class scan_ble extends Activity {
                 public void onLeScan(final BluetoothDevice device, final int rssi, byte[] scanRecord) {
                     runOnUiThread(new Runnable() {
                         @Override
-                        public void run() {//HMSoft
-                            if (device.getName().equals("UT9")) {
-                                int positionInList=positionInList(device);
-                                receiveSignalAndSetPositionDevice(positionInList, rssi);
-                                if (currentPosition==numberPosition) {
-                                    stopScan();
-                                    finishScan();
+                        public void run() {//UT9
+                            if (device.getName()!=null) { //TODO:ดักเนาไว้นะจ้ะ
+                                Log.e("error_wai", "dev:" + device.toString());
+                                if (device.getName().equals("UT9")) {
+                                    int positionInList = positionInList(device);
+                                    receiveSignalAndSetPositionDevice(positionInList, rssi);
+                                    if (currentPosition == numberPosition) {
+                                        stopScan();
+                                        finishScan();
+                                    }
                                 }
+                                else Log.d("Other device :"+device.getName(),log);
                             }
-                            //else Log.d("Other device :"+device.getName(),log);
                         }
                     });
                 }
@@ -256,11 +260,38 @@ public class scan_ble extends Activity {
                     .show();
         }
     }
+    /*private ScanCallback scanCallback=new ScanCallback() {
+        @Override
+        public void onScanResult(int callbackType, ScanResult result) {
+            super.onScanResult(callbackType, result);
+            Log.e("error","dev:"+device.toString());
+        }
+    };*/
+
+    /*ScanCallback scanCallback=new ScanCallback() {
+        @Override
+        public void onScanResult(int callbackType, ScanResult result) {
+            super.onScanResult(callbackType, result);
+            Log.e("error_wai", "dev:" + device.toString());
+            if (result.getDevice().getName().equals("UT9")) {
+                int positionInList=positionInList(result.getDevice());
+                receiveSignalAndSetPositionDevice(positionInList, result.getRssi());
+                if (currentPosition==numberPosition) {
+                    stopScan();
+                    finishScan();
+                }
+            }
+            else Log.d("Other device :"+result.getDevice().getName(),log);
+            result.getDevice().getName();
+        }
+    };*/
     protected void startScan(){
         start.setText("Stop");
+        //mBluetoothAdapter.getBluetoothLeScanner().startScan(scanCallback);
         mBluetoothAdapter.startLeScan(mLeScanCallback);
     }
     protected void stopScan(){
+        //mBluetoothAdapter.getBluetoothLeScanner().stopScan(scanCallback);
         mBluetoothAdapter.stopLeScan(mLeScanCallback);
         if (start.getText()!="Confirm")
             start.setText("Start");

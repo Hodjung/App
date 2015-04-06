@@ -24,7 +24,11 @@ public class room{
     String getName() {return this.name;}
     void setId(int id){this.id=id;}
     void setName(String name){this.name=name;}
-    public Boolean getIsClose() {return this.isClose;}
+    public int getIsClose() {
+        if (this.isClose==true)
+            return 1;
+        return 0;
+    }
     public double getHeightFloor() {return this.heightFloor;}
     public int getWidth() {return this.width;}
     public int getHeight() {return this.height;}

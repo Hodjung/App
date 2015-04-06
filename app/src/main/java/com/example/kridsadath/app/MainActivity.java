@@ -32,9 +32,7 @@ public class MainActivity extends Activity {
                 finish();
             }
         });
-        /*Database db;
+        Database db;
         db = new Database(this);
-        mDb=db.getWritableDatabase();
-        db.onUpgrade(mDb,1,1);*/
     }
 }

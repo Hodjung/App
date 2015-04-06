@@ -78,6 +78,8 @@ public class record_page extends Activity {
                 startActivity(myIntent);
             }
         });
+        //test.setVisibility(View.INVISIBLE);
+        test.setText("Position");
         test.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
