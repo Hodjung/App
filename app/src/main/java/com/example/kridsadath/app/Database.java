@@ -103,7 +103,7 @@ final class Database extends SQLiteOpenHelper {
 
         /*db.execSQL("INSERT INTO "+ TABLE_PLACES +" (" + KEY_PLACE + ", " + KEY_FLOOR
                 + ") VALUES ('Fudge', 95, 750);");*/
-        Log.d("Finish on Create Database","checkLog");
+        //Log.d("Finish on Create Database","checkLog");
     }
 
     // Upgrading database
