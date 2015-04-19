@@ -25,9 +25,9 @@ import org.json.*;
  */
 public class place_page extends Activity {
     List<String> group;
-    ListView placeView;
-    List<place> listPlace;
-    ArrayAdapter<String> adapterPlace;
+    ListView buildingView;
+    List<building> listBuilding;
+    ArrayAdapter<String> adapterBuilding;
     String log="checkLog";
     Database db;
     public place_page(){}
@@ -71,7 +71,7 @@ public class place_page extends Activity {
                 finish();
             }
         });
-        placeView = (ListView)findViewById(R.id.listView);
+        buildingView = (ListView)findViewById(R.id.listView);
         //Load all from database server
         // Loading products in Background Thread
         //new LoadAllProducts().execute();
@@ -110,9 +110,9 @@ public class place_page extends Activity {
                         JSONObject c = place.getJSONObject(i);
                         // Storing each json item in variable
                         String id = c.getString("id");
-                        String place = c.getString("place");
-                        int number_floor = Integer.parseInt(c.getString("number_floor"));
-                        db.addPlace(new place(place,number_floor));
+                        String name = c.getString("place");
+                        //int number_floor = Integer.parseInt(c.getString("number_floor"));
+                        db.addBuilding(new building(name));
                     }
                 }
             } catch (JSONException e) {
@@ -140,14 +140,14 @@ public class place_page extends Activity {
     protected void initPlace() {
         Log.d("initPlace", log);
         group = new ArrayList<String>();
-        listPlace=db.getAllPlaces();
-        if (listPlace==null){
+        listBuilding=db.getAllBuilding();
+        if (listBuilding==null){
             Log.d("listPlace==null",log);
             group.add("Empty");
         }
         else {
             Log.d("listPlace not null",log);
-            for (place pl:listPlace){
+            for (building pl:listBuilding){
                 Log.d(pl.getName(), log);
                 group.add(pl.getName());
             }
@@ -155,14 +155,14 @@ public class place_page extends Activity {
     }
     protected void initPagePlace() {
         Log.d("Add Place Page", log);
-        adapterPlace = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,android.R.id.text1,group);
-        placeView.setAdapter(adapterPlace);
-        placeView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        adapterBuilding = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,android.R.id.text1,group);
+        buildingView.setAdapter(adapterBuilding);
+        buildingView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                if (listPlace.size()>0){
+                if (listBuilding.size()>0){
                     Intent myIntent = new Intent(place_page.this,create_page.class);
-                    myIntent.putExtra("placeId",String.valueOf(listPlace.get(position).getId()));
+                    myIntent.putExtra("placeId",String.valueOf(listBuilding.get(position).getId()));
                     startActivity(myIntent);
                     finish();
                 }

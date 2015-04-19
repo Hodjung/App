@@ -32,9 +32,9 @@ import java.util.List;
  */
 public class create_page extends Activity {
     String log="checkLog";
-    int placeId;
-    place currentPlace;
-    String placeName;
+    int buildingId;
+    building currentBuilding;
+    String buildingName;
     Database db;
     private List<floor> floor;
     ListView listView;
@@ -42,25 +42,18 @@ public class create_page extends Activity {
     private ProgressDialog pDialog;
     JSONParser jParser = new JSONParser();
     JSONArray products = null;
-    static String url_create_ble="http://192.168.137.1/create_ble.php";
-    static String url_create_corner="http://192.168.137.1/create_corner.php";
-    static String url_create_door="http://192.168.137.1/create_door.php";
-    static String url_create_floor="http://192.168.137.1/create_floor.php";
-    static String url_create_near_corner="http://192.168.137.1/create_near_corner.php";
-    static String url_create_pin="http://192.168.137.1/create_pin.php";
-    static String url_create_place="http://192.168.137.1/create_place.php";
-    static String url_create_room="http://192.168.137.1/create_room.php";
+    static String url_save="http://192.168.137.1/save.php";
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.create_page);
         Bundle extras=getIntent().getExtras();
-        placeId=Integer.parseInt(extras.getString("placeId"));
-        TextView place=(TextView)findViewById(R.id.root_text);
+        buildingId=Integer.parseInt(extras.getString("placeId"));
+        TextView building=(TextView)findViewById(R.id.root_text);
         db=new Database(this);
-        currentPlace=db.getPlace(placeId);
-        placeName=currentPlace.getName();
-        place.setText(placeName);
+        currentBuilding=db.getBuilding(buildingId);
+        buildingName=currentBuilding.getName();
+        building.setText(buildingName);
         setView();
         final AlertDialog.Builder boxOption = new AlertDialog.Builder(this);
         final String[] option_header = new String[] { "Manage", "Rename" };
@@ -74,7 +67,7 @@ public class create_page extends Activity {
                     public void onClick(DialogInterface dialog, int which) {
                         if (which==0){
                             Intent myIntent=new Intent(create_page.this,manage_floor.class);
-                            myIntent.putExtra("placeId",String.valueOf(placeId));
+                            myIntent.putExtra("placeId",String.valueOf(buildingId));
                             myIntent.putExtra("floorId",String.valueOf(floor.get(position).getId()));
                             Log.d(floor.get(position).getId()+"","checkLog");
                             startActivity(myIntent);
@@ -89,7 +82,6 @@ public class create_page extends Activity {
             }
         });
         Button btn_confirm=(Button)findViewById(R.id.confirm);
-        Button btn_delete=(Button)findViewById(R.id.delete);
         btn_confirm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -103,6 +95,8 @@ public class create_page extends Activity {
                 finish();
             }
         });
+        Button btn_delete=(Button)findViewById(R.id.delete);
+        btn_delete.setVisibility(View.INVISIBLE);
         btn_delete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -121,14 +115,14 @@ public class create_page extends Activity {
                     }
                     db.deleteFloor(floor.get(i));
                 }
-                db.deletePlace(placeId);
+                db.deleteBuilding(buildingId);
                 Intent intent=new Intent(create_page.this,MainActivity.class);
                 startActivity(intent);
                 finish();
             }
         });
     }
-    class CreatePlace extends AsyncTask<String,String,String>{
+    class CreateBuilding extends AsyncTask<String,String,String>{
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
@@ -143,14 +137,15 @@ public class create_page extends Activity {
         protected String doInBackground(String... args) {
             // Building Parameters
             List<NameValuePair> params = new ArrayList<NameValuePair>();
-            params.add(new BasicNameValuePair("id", String.valueOf(currentPlace.getId())));
-            params.add(new BasicNameValuePair("place", currentPlace.getName()));
-            params.add(new BasicNameValuePair("number_floor", String.valueOf(currentPlace.getNumberFloor())));
+            params.add(new BasicNameValuePair("id", String.valueOf(currentBuilding.getId())));
+            params.add(new BasicNameValuePair("place", currentBuilding.getName()));
+            params.add(new BasicNameValuePair("latitude",String.valueOf(currentBuilding.getLatitude())));
+            params.add(new BasicNameValuePair("longitude",String.valueOf(currentBuilding.getLongitude())));
             // getting JSON Object
             // Note that create product url accepts POST method
-            Log.d(params.toString(),"checkLog");
-            JSONObject json = jParser.makeHttpRequest(url_create_place, "POST", params);
-            Log.d(json.toString(),"checkLog");
+            //Log.d(params.toString(),"checkLog");
+            JSONObject json = jParser.makeHttpRequest(url_save, "POST", params);
+            //Log.d(json.toString(),"checkLog");
             // Check your log cat for JSON reponse
             try {
                 // Checking for SUCCESS TAG
@@ -183,16 +178,16 @@ public class create_page extends Activity {
         @Override
         protected String doInBackground(String... args) {
             List<floor> listFloor=new ArrayList<floor>();
-            listFloor=db.getAllFloor(currentPlace.getId());
+            listFloor=db.getAllFloor(currentBuilding.getId());
             if (listFloor!=null){
                 for (int i=0;i<listFloor.size();i++) {
                     List<NameValuePair> params_floor = new ArrayList<NameValuePair>();
                     params_floor.add(new BasicNameValuePair("id", String.valueOf(listFloor.get(i).getId())));
                     params_floor.add(new BasicNameValuePair("floor", listFloor.get(i).getName()));
-                    params_floor.add(new BasicNameValuePair("placeId", String.valueOf(listFloor.get(i).getPlaceId())));
+                    params_floor.add(new BasicNameValuePair("buildingId", String.valueOf(listFloor.get(i).getPlaceId())));
                     // getting JSON Object
                     // Note that create product url accepts POST method
-                    JSONObject json_floor = jParser.makeHttpRequest(url_create_floor, "POST", params_floor);
+                    JSONObject json_floor = jParser.makeHttpRequest(url_save, "POST", params_floor);
                     try {
                         // Checking for SUCCESS TAG
                         int success = json_floor.getInt("success");
@@ -226,7 +221,7 @@ public class create_page extends Activity {
         @Override
         protected String doInBackground(String... args) {
             List<floor> listFloor=new ArrayList<floor>();
-            listFloor=db.getAllFloor(currentPlace.getId());
+            listFloor=db.getAllFloor(currentBuilding.getId());
             if (listFloor!=null) {
                 for (int i = 0; i < listFloor.size(); i++) {
                     List<room> listRoom = new ArrayList<room>();
@@ -246,7 +241,7 @@ public class create_page extends Activity {
                             // getting JSON Object
                             // Note that create product url accepts POST method
                             Log.d(params_room.toString(),"checkLog");
-                            JSONObject json_room = jParser.makeHttpRequest(url_create_room, "POST", params_room);
+                            JSONObject json_room = jParser.makeHttpRequest(url_save, "POST", params_room);
                             Log.d(json_room.toString(),"checkLog");
                             try {
                                 // Checking for SUCCESS TAG
@@ -284,7 +279,7 @@ public class create_page extends Activity {
         @Override
         protected String doInBackground(String... args) {
             List<floor> listFloor=new ArrayList<floor>();
-            listFloor=db.getAllFloor(currentPlace.getId());
+            listFloor=db.getAllFloor(currentBuilding.getId());
             if (listFloor!=null) {
                 for (int i = 0; i < listFloor.size(); i++) {
                     List<room> listRoom = new ArrayList<room>();
@@ -302,7 +297,7 @@ public class create_page extends Activity {
                                     params_ble.add(new BasicNameValuePair("position", String.valueOf(listBle.get(k).getPosition())));
                                     // getting JSON Object
                                     // Note that create product url accepts POST method
-                                    JSONObject json_ble = jParser.makeHttpRequest(url_create_ble, "POST", params_ble);
+                                    JSONObject json_ble = jParser.makeHttpRequest(url_save, "POST", params_ble);
                                     try {
                                         // Checking for SUCCESS TAG
                                         int success = json_ble.getInt("success");
@@ -341,7 +336,7 @@ public class create_page extends Activity {
         @Override
         protected String doInBackground(String... args) {
             List<floor> listFloor=new ArrayList<floor>();
-            listFloor=db.getAllFloor(currentPlace.getId());
+            listFloor=db.getAllFloor(currentBuilding.getId());
             if (listFloor!=null) {
                 for (int i = 0; i < listFloor.size(); i++) {
                     List<room> listRoom = new ArrayList<room>();
@@ -359,7 +354,7 @@ public class create_page extends Activity {
                                     params_corner.add(new BasicNameValuePair("y", String.valueOf(listCorner.get(i).getY())));
                                     // getting JSON Object
                                     // Note that create product url accepts POST method
-                                    JSONObject json_corner = jParser.makeHttpRequest(url_create_corner, "POST", params_corner);
+                                    JSONObject json_corner = jParser.makeHttpRequest(url_save, "POST", params_corner);
                                     try {
                                         // Checking for SUCCESS TAG
                                         int success = json_corner.getInt("success");
@@ -381,71 +376,10 @@ public class create_page extends Activity {
         @Override
         protected void onPostExecute(String s) {
             pDialog.dismiss();
-            new CreatePin().execute();
+            //new CreatePin().execute();
         }
     }
-    class CreatePin extends AsyncTask<String,String,String>{
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            pDialog = new ProgressDialog(create_page.this);
-            pDialog.setMessage("Sending Pin to Server. Please wait...");
-            pDialog.setIndeterminate(false);
-            pDialog.setCancelable(false);
-            pDialog.show();
-        }
 
-        @Override
-        protected String doInBackground(String... args) {
-            List<floor> listFloor=new ArrayList<floor>();
-            listFloor=db.getAllFloor(currentPlace.getId());
-            if (listFloor!=null) {
-                for (int i = 0; i < listFloor.size(); i++) {
-                    List<room> listRoom = new ArrayList<room>();
-                    listRoom = db.getAllRoom(listFloor.get(i).getId());
-                    if (listRoom != null) {
-                        Log.d(listRoom.toString(),"checkLog");
-                        for (int j = 0; j < listRoom.size(); j++) {
-                            List<pin> listPin=new ArrayList<pin>();
-                            Log.d("get Pin "+listRoom.get(j).getId()+" "+listRoom.size(),"checkLog");
-                            listPin=db.getPin(listRoom.get(j).getId());
-                            if (listPin!=null){
-                                Log.d("Pin != null","checkLog");
-                                for (int k=0;k<listPin.size();k++){
-                                    List<NameValuePair> params_pin = new ArrayList<NameValuePair>();
-                                    params_pin.add(new BasicNameValuePair("roomId", String.valueOf(listPin.get(k).getRoomId())));
-                                    params_pin.add(new BasicNameValuePair("detail", listPin.get(k).getDetail()));
-                                    params_pin.add(new BasicNameValuePair("x", String.valueOf(listPin.get(k).getX())));
-                                    params_pin.add(new BasicNameValuePair("y", String.valueOf(listPin.get(k).getY())));
-                                    // getting JSON Object
-                                    // Note that create product url accepts POST method
-                                    JSONObject json_pin = jParser.makeHttpRequest(url_create_pin, "POST", params_pin);
-                                    try {
-                                        // Checking for SUCCESS TAG
-                                        int success = json_pin.getInt("success");
-                                        if (success == 1) {
-                                        } else {
-                                        }
-                                    } catch (JSONException e) {
-                                        e.printStackTrace();
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(String s) {
-            pDialog.dismiss();
-            Intent intent=new Intent(create_page.this,MainActivity.class);
-            startActivity(intent);
-            finish();
-        }
-    }
     void boxRename (final floor floor){
         AlertDialog.Builder renameBox = new AlertDialog.Builder(this);
         renameBox.setTitle("Rename " + floor.getName());
@@ -469,7 +403,7 @@ public class create_page extends Activity {
         renameBox.show();
     }
     public void setView(){
-        floor=db.getAllFloor(placeId);
+        floor=db.getAllFloor(buildingId);
         ArrayList<String> list=new ArrayList<String>();
         for (int i=0;i<floor.size();i++){
             list.add(floor.get(i).getName());

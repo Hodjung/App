@@ -21,42 +21,55 @@ final class Database extends SQLiteOpenHelper {
     // Database Name
     private static final String DATABASE_NAME = "placesManager";
 
-    // placesManager table name
-    private static final String TABLE_PLACES = "places";
-    private static final String TABLE_FLOORS = "floors";
-    private static final String TABLE_ROOMS = "rooms";
-    private static final String TABLE_BLES = "bles";
-    private static final String TABLE_CORNERS = "corner";
-    private static final String TABLE_DOORS = "doors";
-    private static final String TABLE_PINS = "pins";
+    // buildingManager table name
+    private static final String TABLE_BUILDING = "building";
+    private static final String TABLE_FLOOR = "floor";
+    private static final String TABLE_ROOM = "room";
+    private static final String TABLE_BLE = "ble";
+    private static final String TABLE_CORNER = "corner";
+    private static final String TABLE_PIN = "pin";
 
-    // Places Table Columns names
+    // Building Table Columns names
     private static final String KEY_ID = "id";
-    private static final String KEY_PLACE = "place";
-    private static final String KEY_FLOOR = "number_floor";
+    private static final String KEY_NAME = "name";
+    private static final String KEY_LATITUDE = "latitude";
+    private static final String KEY_LONGITUDE = "longitude";
+    //private static final String KEY_FLOOR = "number_floor";
+
     // Floors Table Columns names
     //private static final String KEY_ID = "id";
-    private static final String KEY_FLOOR_NAME = "floor";
-    private static final String KEY_PLACE_ID = "placeId";
+    //private static final String KEY_NAME = "name";
+    private static final String KEY_BUILDING_ID = "buildingId";
+    private static final String KEY_IMAGE_ID = "imageId";
+
     // Rooms Table Columns names
     //private static final String KEY_ID = "id";
-    private static final String KEY_ROOM_NAME = "room";
+    //private static final String KEY_NAME = "name";
     private static final String KEY_DETAIL = "detail";
-    private static final String KEY_HEIGHT_FLOOR = "heightFloor";
+    private static final String KEY_HEIGHT = "height";
     private static final String KEY_IS_CLOSE = "isClose";
     private static final String KEY_WIDTH = "width";
-    private static final String KEY_HEIGHT = "height";
+    private static final String KEY_DEPTH = "depth";
     private static final String KEY_RANGE = "range";
     private static final String KEY_FLOOR_ID = "floorId";
+
     // BLE Table Columns names
     //private static final String KEY_ID = "id";
-    private static final String KEY_BLE_NAME = "macAddress";
+    private static final String KEY_MAC = "macAddress";
     private static final String KEY_ROOM_ID = "roomId";
     private static final String KEY_POSITION = "position";
+
     // Corner Table Columns names
-    //private static final String KEY_ID = "id";
+    //private static final String KEY_MAC = "macAddress";
     //private static final String KEY_ROOM_ID = "roomId";
-    private static final String KEY_NO_CORNER = "noCorner";
+    //private static final String KEY_POSITION = "x";
+
+    // Pin Table Columns names
+    //private static final String KEY_ID = "id";
+    //private static final String KEY_FLOOR_ID = "floorId";
+    //private static final String KEY_NAME = "name";
+    private static final String KEY_INFO = "information";
+    private static final String KEY_TYPE = "type";
     private static final String KEY_X = "x";
     private static final String KEY_Y = "y";
 
@@ -69,40 +82,29 @@ final class Database extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         Log.d("onCreateInDatabase", "checkLog");
-        String CREATE_PLACES_TABLE = "CREATE TABLE IF NOT EXISTS " + TABLE_PLACES + "(" + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
-                + KEY_PLACE + " TEXT," + KEY_FLOOR + " INTEGER" + ")";
-        db.execSQL(CREATE_PLACES_TABLE);
+        String CREATE_BUILDING_TABLE = "CREATE TABLE IF NOT EXISTS " + TABLE_BUILDING + "(" + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+                + KEY_NAME + " TEXT," + KEY_LATITUDE + " FLOAT," + KEY_LONGITUDE + " FLOAT)";
+        db.execSQL(CREATE_BUILDING_TABLE);
 
-        String CREATE_FLOORS_TABLE = "CREATE TABLE IF NOT EXISTS " + TABLE_FLOORS + "(" + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
-                + KEY_FLOOR_NAME + " TEXT," + KEY_PLACE_ID + " INTEGER" + ")";
-        db.execSQL(CREATE_FLOORS_TABLE);
+        String CREATE_FLOOR_TABLE = "CREATE TABLE IF NOT EXISTS " + TABLE_FLOOR + "(" + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+                + KEY_NAME + " TEXT," + KEY_BUILDING_ID + " INTEGER," +KEY_IMAGE_ID+ " TIMESTAMP DEFAULT CURRENT_TIMESTAMP )";
+        db.execSQL(CREATE_FLOOR_TABLE);
 
-        String CREATE_ROOMS_TABLE = "CREATE TABLE IF NOT EXISTS " + TABLE_ROOMS + "("+KEY_ID+" INTEGER PRIMARY KEY AUTOINCREMENT,"+KEY_ROOM_NAME+
-                " TEXT,"+KEY_DETAIL+" TEXT,"+KEY_HEIGHT_FLOOR+" INTEGER,"+KEY_IS_CLOSE+" BOOLEAN,"+KEY_WIDTH+" INTEGER,"+KEY_HEIGHT+
+        String CREATE_ROOM_TABLE = "CREATE TABLE IF NOT EXISTS " + TABLE_ROOM + "("+KEY_ID+" INTEGER PRIMARY KEY AUTOINCREMENT,"+KEY_NAME+
+                " TEXT,"+KEY_DETAIL+" TEXT,"+KEY_HEIGHT+" INTEGER,"+KEY_IS_CLOSE+" BOOLEAN,"+KEY_WIDTH+" INTEGER,"+KEY_DEPTH+
                 " INTEGER,"+KEY_RANGE+" INTEGER,"+KEY_FLOOR_ID+" INTEGER)";
-        db.execSQL(CREATE_ROOMS_TABLE);
+        db.execSQL(CREATE_ROOM_TABLE);
 
-        String CREATE_BLES_TABLE = "CREATE TABLE IF NOT EXISTS "+TABLE_BLES+"("+KEY_ID+" INTEGER PRIMARY KEY AUTOINCREMENT,"+KEY_BLE_NAME+
-                " TEXT,"+KEY_ROOM_ID+" INTEGER,"+KEY_POSITION+" TEXT)";
-        db.execSQL(CREATE_BLES_TABLE);
+        String CREATE_BLE_TABLE = "CREATE TABLE IF NOT EXISTS "+TABLE_BLE+"("+KEY_ID+" INTEGER PRIMARY KEY,"+KEY_MAC+" TEXT,"+KEY_ROOM_ID+" INTEGER,"+KEY_POSITION+" INTEGER)";
+        db.execSQL(CREATE_BLE_TABLE);
 
-        String CREATE_CORNER_TABLE="CREATE TABLE IF NOT EXISTS "+TABLE_CORNERS+"("+KEY_ID+" INTEGER PRIMARY KEY AUTOINCREMENT,"+KEY_ROOM_ID+
-                " INTEGER,"+KEY_NO_CORNER+" INTEGER,"+KEY_X+" FLOAT,"+KEY_Y+" FLOAT)";
+        String CREATE_CORNER_TABLE="CREATE TABLE IF NOT EXISTS "+TABLE_CORNER+"("+KEY_ID+" INTEGER PRIMARY KEY,"+KEY_MAC+" TEXT,"+KEY_ROOM_ID+" INTEGER,"+KEY_POSITION+" INTEGER)";
         db.execSQL(CREATE_CORNER_TABLE);
 
-        String CREATE_DOOR_TABLE="CREATE TABLE IF NOT EXISTS "+TABLE_DOORS+"("+KEY_ID+" INTEGER PRIMARY KEY AUTOINCREMENT,"+KEY_ROOM_ID+
-                " INTEGER,"+KEY_X+" FLOAT,"+KEY_Y+" FLOAT)";
-        db.execSQL(CREATE_DOOR_TABLE);
-
-        String CREATE_PIN_TABLE="CREATE TABLE IF NOT EXISTS "+TABLE_PINS+"("+KEY_ID+" INTEGER PRIMARY KEY AUTOINCREMENT,"+KEY_ROOM_ID+
-                " INTEGER,"+KEY_DETAIL+" TEXT,"+KEY_X+" FLOAT,"+KEY_Y+" FLOAT)";
+        String CREATE_PIN_TABLE="CREATE TABLE IF NOT EXISTS "+TABLE_PIN+"("+KEY_ID+" INTEGER PRIMARY KEY AUTOINCREMENT,"+KEY_FLOOR_ID+
+                " INTEGER,"+KEY_NAME+" TEXT,"+KEY_INFO+" TEXT,"+KEY_TYPE+" INTEGER,"+KEY_X+" FLOAT,"+KEY_Y+" FLOAT)";
         db.execSQL(CREATE_PIN_TABLE);
 
-        String CREATE_NEAR_CORNER_TABLE="CREATE TABLE IF NOT EXISTS nearCorners(id INTEGER PRIMARY KEY AUTOINCREMENT,roomId INTEGER,noCorner INTEGER,macAddress TEXT)";
-        db.execSQL(CREATE_NEAR_CORNER_TABLE);
-
-        /*db.execSQL("INSERT INTO "+ TABLE_PLACES +" (" + KEY_PLACE + ", " + KEY_FLOOR
-                + ") VALUES ('Fudge', 95, 750);");*/
         //Log.d("Finish on Create Database","checkLog");
     }
 
@@ -111,48 +113,39 @@ final class Database extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         Log.d("onUpdate","checkLog");
         // Drop older table if existed
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_PLACES);
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_FLOORS);
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_ROOMS);
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_BLES);
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_CORNERS);
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_DOORS);
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_PINS);
-        db.execSQL("DROP TABLE IF EXISTS nearCorners");
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_BUILDING);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_FLOOR);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_ROOM);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_BLE);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_CORNER);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_PIN);
         // Create tables again
         onCreate(db);
     }
-    void addNearCorner(nearCorner nearCorner){
-        ContentValues values = new ContentValues();
-        values.put("roomId",nearCorner.getRoomId());
-        values.put("noCorner",nearCorner.getNoCorner());
-        values.put("macAddress",nearCorner.getMacId());
-        SQLiteDatabase db = this.getWritableDatabase();
-        db.insert("nearCorner",null,values);
-        db.close();
-    }
-    int addPin(int roomId,String detail,float x,float y){
+    /*int addPin(int floorId,String name,String info,int type,float x,float y){
         int id=0;
         ContentValues values = new ContentValues();
-        values.put(KEY_ROOM_ID,roomId);
-        values.put(KEY_DETAIL,detail);
+        values.put(KEY_FLOOR_ID,floorId);
+        values.put(KEY_NAME,name);
+        values.put(KEY_INFO,info);
+        values.put(KEY_TYPE,type);
         values.put(KEY_X,x);
         values.put(KEY_Y,y);
         SQLiteDatabase db = this.getWritableDatabase();
-        id= (int) db.insert(TABLE_PINS,null,values);
+        id= (int) db.insert(TABLE_PIN,null,values);
         db.close();
         return id;
     }
     void deletePin(int roomId) {
         SQLiteDatabase db = this.getWritableDatabase();
-        db.delete(TABLE_PINS, "roomId" + " = ?",
+        db.delete(TABLE_PIN, "roomId" + " = ?",
                 new String[] { String.valueOf(roomId) });
         db.close();
     }
     public List<pin> getPin(int roomId){
         SQLiteDatabase db=this.getReadableDatabase();
         List<pin> list=null;
-        String selectQuery = "SELECT * FROM "+TABLE_PINS+" WHERE "+KEY_ROOM_ID+"=?";
+        String selectQuery = "SELECT * FROM "+TABLE_PIN+" WHERE "+KEY_ROOM_ID+"=?";
         Cursor cursor = db.rawQuery(selectQuery,new String[]{String.valueOf(roomId)});
 
         if (cursor.moveToFirst()){
@@ -162,59 +155,28 @@ final class Database extends SQLiteOpenHelper {
             }while(cursor.moveToNext());
         }
         return list;
-    }
-    int addDoor(int roomId,float x,float y){
+    }*/
+    int addCorner(int roomId,String macAddress,int position){
         int id=0;
         ContentValues values = new ContentValues();
         values.put(KEY_ROOM_ID,roomId);
-        values.put(KEY_X,x);
-        values.put(KEY_Y,y);
+        values.put(KEY_MAC,macAddress);
+        values.put(KEY_POSITION,position);
         SQLiteDatabase db = this.getWritableDatabase();
-        id= (int) db.insert(TABLE_DOORS,null,values);
+        id=(int)db.insert(TABLE_CORNER,null,values);
         db.close();
         return id;
     }
-    void deleteDoor(int doorId) {
+    /*void deleteCorner(int roomId) {
         SQLiteDatabase db = this.getWritableDatabase();
-        db.delete(TABLE_CORNERS, KEY_ID + " = ?",
-                new String[] { String.valueOf(doorId) });
-        db.close();
-    }
-    public List<door> getDoor(int roomId){
-        SQLiteDatabase db=this.getReadableDatabase();
-        List<door> list=null;
-        String selectQuery = "SELECT * FROM "+TABLE_CORNERS+" WHERE "+KEY_ROOM_ID+"=?";
-        Cursor cursor = db.rawQuery(selectQuery,new String[]{String.valueOf(roomId)});
-        if (cursor.moveToFirst()){
-            list=new ArrayList<door>();
-            do {
-                list.add(new door(Integer.parseInt(cursor.getString(2)),Integer.parseInt(cursor.getString(3))));
-            }while(cursor.moveToNext());
-        }
-        return list;
-    }
-    int addCorner(int roomId,int noCorner,float x,float y){
-        int id=0;
-        ContentValues values = new ContentValues();
-        values.put(KEY_ROOM_ID,roomId);
-        values.put(KEY_NO_CORNER,noCorner);
-        values.put(KEY_X,x);
-        values.put(KEY_Y,y);
-        SQLiteDatabase db = this.getWritableDatabase();
-        id=(int)db.insert(TABLE_CORNERS,null,values);
-        db.close();
-        return id;
-    }
-    void deleteCorner(int roomId) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        db.delete(TABLE_CORNERS, KEY_ROOM_ID + " = ?",
+        db.delete(TABLE_CORNER, KEY_ROOM_ID + " = ?",
                 new String[] { String.valueOf(roomId) });
         db.close();
-    }
+    }*/
     public List<corner> getCorner(int roomId){
         SQLiteDatabase db=this.getReadableDatabase();
         List<corner> list=null;
-        String selectQuery = "SELECT * FROM "+TABLE_CORNERS+" WHERE "+KEY_ROOM_ID+"=?";
+        String selectQuery = "SELECT * FROM "+TABLE_CORNER+" WHERE "+KEY_ROOM_ID+"=?";
         Cursor cursor = db.rawQuery(selectQuery,new String[]{String.valueOf(roomId)});
         if (cursor.moveToFirst()){
             list=new ArrayList<corner>();
@@ -236,24 +198,23 @@ final class Database extends SQLiteOpenHelper {
         //0id INTEGER PRIMARY KEY AUTOINCREMENT,1room TEXT,2detail TEXT,3heightFloor INTEGER,4isClose BOOLEAN,
         //5width INTEGER,6height INTEGER,7rangeBle INTEGER,8floorId INTEGER
         ContentValues values = new ContentValues();
-        values.put(KEY_BLE_NAME, ble.getMacId());
+        values.put(KEY_MAC, ble.getMacId());
         values.put(KEY_ROOM_ID, ble.getRoomId());
         values.put(KEY_POSITION, ble.getPosition());
 
         // Inserting Row
-        int id = (int)db.insert(TABLE_BLES, null, values);
+        int id = (int)db.insert(TABLE_BLE, null, values);
         db.close(); // Closing database connection
         Log.d("id="+id,"checkLog");
         return id;
     }
-
-    ble getBle(String macAdd) {
+    /*ble getBle(String macAdd) {
         SQLiteDatabase db = this.getReadableDatabase();
         Log.d("getBle "+macAdd,"checkLog");
-        Cursor cursor = db.query(TABLE_BLES, new String[] { KEY_ID, KEY_BLE_NAME, KEY_ROOM_ID,KEY_POSITION },
-                KEY_BLE_NAME + "=?",new String[] {macAdd},null,null,null,null);
-        /*String selectQuery = "SELECT * FROM " +TABLE_BLE;//+" WHERE id=?";
-        Cursor cursor = db.rawQuery(selectQuery,new String[]{"0"});*/
+        Cursor cursor = db.query(TABLE_BLE, new String[] { KEY_ID, KEY_MAC, KEY_ROOM_ID,KEY_POSITION },
+                KEY_MAC + "=?",new String[] {macAdd},null,null,null,null);
+        //String selectQuery = "SELECT * FROM " +TABLE_BLE;//+" WHERE id=?";
+        //Cursor cursor = db.rawQuery(selectQuery,new String[]{"0"});
         ble ble=null;
         if (cursor != null){
             Log.d("cursor not null "+cursor.getColumnName(0)+cursor.getColumnName(1)+cursor.getColumnName(2)+cursor.getColumnName(3),"checkLog");
@@ -269,12 +230,12 @@ final class Database extends SQLiteOpenHelper {
         }
         Log.d("---------------","checkLog");
         return ble;
-    }
+    }*/
     // Getting All rooms
     public List<ble> getAllBle(int roomId) {
         List<ble> bleList = null;
         // Select All Query
-        String selectQuery = "SELECT  * FROM " + TABLE_BLES + " WHERE roomId=?";
+        String selectQuery = "SELECT  * FROM " + TABLE_BLE + " WHERE roomId=?";
 
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, new String[]{String.valueOf(roomId)});
@@ -303,10 +264,10 @@ final class Database extends SQLiteOpenHelper {
         return db.update(TABLE_FLOORS, values, KEY_ID + " = ?",new String[] { String.valueOf(room.getId()) });
     }*/
 
-    // Deleting single floor
+    // Deleting single ble
     public void deleteBle(ble ble) {
         SQLiteDatabase db = this.getWritableDatabase();
-        db.delete(TABLE_BLES, KEY_ID + " = ?",new String[] { String.valueOf(ble.getId())});
+        db.delete(TABLE_BLE, KEY_ID + " = ?",new String[] { String.valueOf(ble.getId())});
         db.close();
     }
     /**
@@ -318,24 +279,24 @@ final class Database extends SQLiteOpenHelper {
         //0id INTEGER PRIMARY KEY AUTOINCREMENT,1room TEXT,2detail TEXT,3heightFloor INTEGER,4isClose BOOLEAN,
         //5width INTEGER,6height INTEGER,7rangeBle INTEGER,8floorId INTEGER
         ContentValues values = new ContentValues();
-        values.put(KEY_ROOM_NAME, room.getName());
+        values.put(KEY_NAME, room.getName());
         values.put(KEY_DETAIL, room.getDetail());
-        values.put(KEY_HEIGHT_FLOOR, room.getHeightFloor());
+        values.put(KEY_HEIGHT, room.getHeightFloor());
         values.put(KEY_IS_CLOSE, room.getIsClose());
         values.put(KEY_WIDTH, room.getWidth());
-        values.put(KEY_HEIGHT, room.getHeight());
+        values.put(KEY_DEPTH, room.getHeight());
         values.put(KEY_RANGE, room.getRange());
         values.put(KEY_FLOOR_ID, room.getFloorId());
 
         // Inserting Row
-        int id = (int)db.insert(TABLE_ROOMS, null, values);
+        int id = (int)db.insert(TABLE_ROOM, null, values);
         db.close(); // Closing database connection
         return id;
     }
 
     room getRoom(int id) {
         SQLiteDatabase db = this.getReadableDatabase();
-        String selectQuery = "SELECT  * FROM " + TABLE_ROOMS + " WHERE "+KEY_ID+"=?";
+        String selectQuery = "SELECT  * FROM " + TABLE_ROOM + " WHERE "+KEY_ID+"=?";
         Cursor cursor = db.rawQuery(selectQuery,new String[]{String.valueOf(id)});
         if (cursor != null)
             cursor.moveToFirst();
@@ -351,7 +312,7 @@ final class Database extends SQLiteOpenHelper {
     public List<room> getAllRoom(int floorId) {
         List<room> roomList = null;
         // Select All Query
-        String selectQuery = "SELECT  * FROM " + TABLE_ROOMS + " WHERE floorId=?";
+        String selectQuery = "SELECT  * FROM " + TABLE_ROOM + " WHERE floorId=?";
 
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, new String[]{String.valueOf(floorId)});
@@ -384,16 +345,16 @@ final class Database extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
-        values.put(KEY_ROOM_NAME, room.getName());
+        values.put(KEY_NAME, room.getName());
         Log.d(room.getId()+" "+room.getName()+" "+room.getId(),"checkLog");
         // updating row
-        return db.update(TABLE_ROOMS, values, KEY_ID + " = ?",new String[] { String.valueOf(room.getId()) });
+        return db.update(TABLE_ROOM, values, KEY_ID + " = ?",new String[] { String.valueOf(room.getId()) });
     }
 
     // Deleting single floor
     public void deleteRoom(room room) {
         SQLiteDatabase db = this.getWritableDatabase();
-        db.delete(TABLE_ROOMS, KEY_ID + " = ?",new String[] { String.valueOf(room.getId())});
+        db.delete(TABLE_ROOM, KEY_ID + " = ?",new String[] { String.valueOf(room.getId())});
         db.close();
     }
     /**
@@ -404,12 +365,12 @@ final class Database extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
-        values.put(KEY_FLOOR_NAME, floor.getName());
-        values.put(KEY_PLACE_ID, floor.getPlaceId());
+        values.put(KEY_NAME, floor.getName());
+        values.put(KEY_BUILDING_ID, floor.getPlaceId());
 
         // Inserting Row
         int n;
-        n=(int)db.insert(TABLE_FLOORS, null, values);
+        n=(int)db.insert(TABLE_FLOOR, null, values);
         db.close(); // Closing database connection
         return n;
     }
@@ -417,7 +378,7 @@ final class Database extends SQLiteOpenHelper {
     floor getFloor(int id) {
         SQLiteDatabase db = this.getReadableDatabase();
 
-        String selectQuery = "SELECT  * FROM " + TABLE_FLOORS + " WHERE "+KEY_ID+"=?";
+        String selectQuery = "SELECT  * FROM " + TABLE_FLOOR + " WHERE "+KEY_ID+"=?";
         Cursor cursor = db.rawQuery(selectQuery, new String[]{String.valueOf(id)});
         if (cursor != null)
             cursor.moveToFirst();
@@ -429,7 +390,7 @@ final class Database extends SQLiteOpenHelper {
     public List<floor> getAllFloor(int placeId) {
         List<floor> floorList = null;
         // Select All Query
-        String selectQuery = "SELECT  * FROM " + TABLE_FLOORS + " WHERE placeId=?";
+        String selectQuery = "SELECT  * FROM " + TABLE_FLOOR + " WHERE placeId=?";
 
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, new String[]{String.valueOf(placeId)});
@@ -456,61 +417,62 @@ final class Database extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
-        values.put(KEY_FLOOR_NAME, floor.getName());
-        values.put(KEY_PLACE_ID, floor.getPlaceId());
+        values.put(KEY_NAME, floor.getName());
+        values.put(KEY_BUILDING_ID, floor.getPlaceId());
         Log.d(floor.getId()+" "+floor.getName()+" "+floor.getPlaceId(),"checkLog");
         // updating row
-        return db.update(TABLE_FLOORS, values, KEY_ID + " = ?",new String[] { String.valueOf(floor.getId()) });
+        return db.update(TABLE_FLOOR, values, KEY_ID + " = ?",new String[] { String.valueOf(floor.getId()) });
     }
 
     // Deleting single floor
     public void deleteFloor(floor floor) {
         SQLiteDatabase db = this.getWritableDatabase();
-        db.delete(TABLE_FLOORS, KEY_ID + " = ?",new String[] { String.valueOf(floor.getId())});
+        db.delete(TABLE_FLOOR, KEY_ID + " = ?",new String[] { String.valueOf(floor.getId())});
         db.close();
     }
     /**
-     * All CRUD(Create, Read, Update, Delete) Operations FOR PLACE----------------------------------
+     * All CRUD(Create, Read, Update, Delete) Operations FOR Building----------------------------------
      */
 
-    // Adding new place
-    int addPlace(place place) {
+    // Adding new Building
+    int addBuilding(building building) {
         Log.d("Add Place","checkLog");
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
-        values.put(KEY_PLACE, place.getName()); // Contact Name
-        values.put(KEY_FLOOR, place.getNumberFloor());
+        values.put(KEY_NAME, building.getName()); // Contact Name
+        values.put(KEY_LATITUDE, building.getLatitude());
+        values.put(KEY_LONGITUDE, building.getLongitude());
 
         // Inserting Row
         int id;
-        id= (int) db.insert(TABLE_PLACES, null, values);
-        Log.d("Place ID ="+id,"checkLog");
+        id= (int) db.insert(TABLE_BUILDING, null, values);
+        Log.d("Building ID ="+id,"checkLog");
         db.close(); // Closing database connection
         return id;
     }
 
     // Getting single place
-    place getPlace(int id) {
+    building getBuilding(int id) {
         SQLiteDatabase db = this.getReadableDatabase();
 
-        Cursor cursor = db.query(TABLE_PLACES, new String[] { KEY_ID, KEY_PLACE, KEY_FLOOR },
+        Cursor cursor = db.query(TABLE_BUILDING, new String[] { KEY_ID, KEY_NAME, KEY_LATITUDE, KEY_LONGITUDE},
                 KEY_ID + "=?",new String[] { String.valueOf(id) }, null, null, null, null);
         if (cursor != null)
             cursor.moveToFirst();
 
         //place contact = new place(Integer.parseInt(cursor.getString(0)),cursor.getString(1), cursor.getString(2));
         // return contact
-        place place = new place(cursor.getString(1),Integer.parseInt(cursor.getString(2)));
-        place.setId(Integer.parseInt(cursor.getString(0)));
-        return place;
+        building building = new building(cursor.getString(1));
+        building.setId(Integer.parseInt(cursor.getString(0)));
+        return building;
     }
 
-    // Getting All places
-    public List<place> getAllPlaces() {
-        List<place> placeList = new ArrayList<place>();
+    // Getting All Building
+    public List<building> getAllBuilding() {
+        List<building> buildingList = new ArrayList<building>();
         // Select All Query
-        String selectQuery = "SELECT  * FROM " + TABLE_PLACES;
+        String selectQuery = "SELECT  * FROM " + TABLE_BUILDING;
 
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
@@ -518,46 +480,46 @@ final class Database extends SQLiteOpenHelper {
         // looping through all rows and adding to list
         if (cursor.moveToFirst()) {
             do {
-                place place = new place();
-                place.setId(Integer.parseInt(cursor.getString(0)));
-                place.setName(cursor.getString(1));
-                place.setNumberFloor(cursor.getString(2));
+                building building = new building();
+                building.setId(Integer.parseInt(cursor.getString(0)));
+                building.setName(cursor.getString(1));
+                building.setNumberFloor(cursor.getString(2));
                 // Adding contact to list
-                placeList.add(place);
+                buildingList.add(building);
             } while (cursor.moveToNext());
         }
         // return place list
-        return placeList;
+        return buildingList;
     }
 
     // Updating single place
-    public int updatePlace(place place) {
+    public int updateBuilding(building building) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
-        values.put(KEY_PLACE, place.getName());
+        values.put(KEY_NAME, building.getName());
         //values.put(KEY_PH_NO, place.getPhoneNumber());
         // updating row
-        return db.update(TABLE_PLACES, values, KEY_ID + " = ?",
-                new String[] { String.valueOf(place.getId()) });
+        return db.update(TABLE_BUILDING, values, KEY_ID + " = ?",
+                new String[] { String.valueOf(building.getId()) });
     }
 
     // Deleting single place
-    public void deletePlace(int place) {
+    public void deleteBuilding(int building) {
         SQLiteDatabase db = this.getWritableDatabase();
-        db.delete(TABLE_PLACES, KEY_ID + " = ?",
-                new String[] { String.valueOf(place) });
+        db.delete(TABLE_BUILDING, KEY_ID + " = ?",
+                new String[] { String.valueOf(building) });
         db.close();
     }
 
     // Getting places Count
-    public int getPlacesCount() {
-        String countQuery = "SELECT  * FROM " + TABLE_PLACES;
+    /*public int getBuildingCount() {
+        String countQuery = "SELECT  * FROM " + TABLE_BUILDING;
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery(countQuery, null);
         cursor.close();
 
         // return count
         return cursor.getCount();
-    }
+    }*/
 }
