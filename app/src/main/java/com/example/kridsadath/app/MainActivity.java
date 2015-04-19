@@ -14,7 +14,10 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.first_page);
-        Button create=(Button)findViewById(R.id.create);
+        Intent myIntent=new Intent(MainActivity.this,place_page.class);
+        startActivity(myIntent);
+        finish();
+        /*Button create=(Button)findViewById(R.id.create);
         create.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -33,6 +36,6 @@ public class MainActivity extends Activity {
             }
         });
         Database db;
-        db = new Database(this);
+        db = new Database(this);*/
     }
 }

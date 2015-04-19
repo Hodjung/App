@@ -8,7 +8,7 @@ import java.util.ArrayList;
 public class building {
     int id,num_floor;
     String name;
-    public building(String name){
+    public building(int id,String name,float latitude,float longitude){
         this.name=name;
     }
     public building(){}

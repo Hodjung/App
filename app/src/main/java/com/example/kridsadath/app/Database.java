@@ -101,9 +101,9 @@ final class Database extends SQLiteOpenHelper {
         String CREATE_CORNER_TABLE="CREATE TABLE IF NOT EXISTS "+TABLE_CORNER+"("+KEY_ID+" INTEGER PRIMARY KEY,"+KEY_MAC+" TEXT,"+KEY_ROOM_ID+" INTEGER,"+KEY_POSITION+" INTEGER)";
         db.execSQL(CREATE_CORNER_TABLE);
 
-        String CREATE_PIN_TABLE="CREATE TABLE IF NOT EXISTS "+TABLE_PIN+"("+KEY_ID+" INTEGER PRIMARY KEY AUTOINCREMENT,"+KEY_FLOOR_ID+
+        /*String CREATE_PIN_TABLE="CREATE TABLE IF NOT EXISTS "+TABLE_PIN+"("+KEY_ID+" INTEGER PRIMARY KEY AUTOINCREMENT,"+KEY_FLOOR_ID+
                 " INTEGER,"+KEY_NAME+" TEXT,"+KEY_INFO+" TEXT,"+KEY_TYPE+" INTEGER,"+KEY_X+" FLOAT,"+KEY_Y+" FLOAT)";
-        db.execSQL(CREATE_PIN_TABLE);
+        db.execSQL(CREATE_PIN_TABLE);*/
 
         //Log.d("Finish on Create Database","checkLog");
     }
@@ -118,7 +118,7 @@ final class Database extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_ROOM);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_BLE);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_CORNER);
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_PIN);
+        //db.execSQL("DROP TABLE IF EXISTS " + TABLE_PIN);
         // Create tables again
         onCreate(db);
     }
