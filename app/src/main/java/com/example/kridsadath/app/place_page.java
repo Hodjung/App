@@ -26,6 +26,7 @@ import org.json.*;
 public class place_page extends Activity {
     List<String> group;
     ListView buildingView;
+    String msLog="checkLog";
     List<building> listBuilding;
     ArrayAdapter<String> adapterBuilding;
     String log="checkLog";
@@ -33,7 +34,7 @@ public class place_page extends Activity {
     public place_page(){}
     // Progress Dialog
     private ProgressDialog pDialog;
-    private static String url_all_places="192.168.137.1/get_place.php";
+    private static String url_get="http://192.168.137.1/get.php";
     // Creating JSON Parser object
     JSONParser jParser = new JSONParser();
     private static final String TAG_SUCCESS = "success";
@@ -48,8 +49,8 @@ public class place_page extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         db = new Database(this);
-        /*mDb=db.getWritableDatabase();
-        db.onUpgrade(mDb,1,1);*/
+        mDb=db.getWritableDatabase();
+        db.onUpgrade(mDb,1,1);
         setContentView(R.layout.manage_floor_page);
         TextView name_Place = (TextView)findViewById(R.id.name_floor);
         name_Place.setText("Building");
@@ -62,12 +63,12 @@ public class place_page extends Activity {
                 finish();
             }
         });
-        Button back = (Button)findViewById(R.id.back);
-        back.setVisibility(View.INVISIBLE);
-        back.setOnClickListener(new View.OnClickListener() {
+        Button refresh = (Button)findViewById(R.id.back);
+        refresh.setText("refresh");
+        refresh.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent myIntent=new Intent(place_page.this,MainActivity.class);
+                Intent myIntent=new Intent(place_page.this,place_page.class);
                 startActivity(myIntent);
                 finish();
             }
@@ -96,9 +97,9 @@ public class place_page extends Activity {
             // Building Parameters
             List<NameValuePair> params = new ArrayList<NameValuePair>();
             // getting JSON string from URL
-            JSONObject json = jParser.makeHttpRequest(url_all_places, "POST", params);
+            JSONObject json = jParser.makeHttpRequest(url_get, "POST", params);
             // Check your log cat for JSON reponse
-            Log.d("All Products: ", json.toString());
+            //Log.d("All Products: ", json.toString());
             try {
                 // Checking for SUCCESS TAG
                 int success = json.getInt(TAG_SUCCESS);
@@ -107,48 +108,57 @@ public class place_page extends Activity {
                     // Getting Array of Products
                     all = json.getJSONArray("building");
                     // looping through All Products
-                    for (int i = 0; i < all.length(); i++) {
-                        JSONObject building = all.getJSONObject(i);
+                    Log.d(""+all.length(),msLog);
+                    Log.d(msLog+"",all.getJSONObject(0)+"");
+                    Log.d(msLog+"",all.getJSONObject(1)+"");
+                    Log.d(msLog+"",all.getJSONObject(2)+"");
+                    int i;
+                    for (i = 0; i < all.length(); i++) {
+                        JSONObject build = all.getJSONObject(i);
+                        Log.d("i = "+i+" "+build.getString("id")+" "+build.getString("name"),msLog);
                         // Storing each json item in variable
-                        String id = building.getString("id");
-                        String name = building.getString("name");
-                        String latitude = building.getString("latitude");
-                        String longitude = building.getString("longitude");
+                        String id = build.getString("id");
+                        String name = build.getString("name");
+                        String latitude = build.getString("latitude");
+                        String longitude = build.getString("longitude");
                         db.addBuilding(new building(Integer.valueOf(id),name,Float.valueOf(latitude),Float.valueOf(longitude)));
 
-                        JSONArray all_floor=json.getJSONArray("floor");
-                        for (int j=0;j<all_floor.length();j++){
+                        JSONArray all_floor=build.getJSONArray("floor");
+                        int j;
+                        for (j=0;j<all_floor.length();j++){
                             JSONObject floor = all_floor.getJSONObject(j);
                             String idF = floor.getString("id");
                             String nameF= floor.getString("name");
                             String buildingId = floor.getString("buildingId");
                             int buildingIdF=Integer.valueOf(buildingId);
                             String imageIdF = floor.getString("imageId");
-                            db.addFloor(new floor(nameF,buildingIdF));
+                            db.addFloor(new floor(Integer.valueOf(idF),nameF,buildingIdF,imageIdF));
 
-                            JSONArray all_room=json.getJSONArray("room");
-                            for (int k=0;k<all_room.length();k++){
+                            JSONArray all_room=floor.getJSONArray("room");
+                            int k;
+                            for (k=0;k<all_room.length();k++){
                                 JSONObject room = all_room.getJSONObject(k);
                                 String idR = room.getString("id");
                                 String nameR = room.getString("name");
                                 String detailR = room.getString("detail");
-                                String heightR = room.getString("heightR");
+                                String heightR = room.getString("height");
                                 String isClose = room.getString("isClose");
                                 String width = room.getString("width");
                                 String depth = room.getString("depth");
                                 String range = room.getString("range");
                                 String floorId = room.getString("floorId");
-                                db.addRoom(new room(nameR,detailR,Integer.valueOf(floorId),Boolean.valueOf(isClose),Double.valueOf(heightR)
+                                db.addRoom(new room(Integer.valueOf(idR),nameR,detailR,Integer.valueOf(floorId),Boolean.valueOf(isClose),Double.valueOf(heightR)
                                         ,Integer.valueOf(width),Integer.valueOf(depth),Integer.valueOf(range)));
 
-                                JSONArray all_ble=json.getJSONArray("ble");
-                                for (int l=0;l<all_ble.length();l++){
+                                JSONArray all_ble=room.getJSONArray("ble");
+                                int l;
+                                for (l=0;l<all_ble.length();l++){
                                     JSONObject ble = all_ble.getJSONObject(l);
                                     String idB = ble.getString("id");
                                     String macB = ble.getString("macAddress");
                                     String roomIdB = ble.getString("roomId");
                                     String positionB = ble.getString("position");
-                                    db.addBle(new ble(macB,Integer.valueOf(roomIdB),Integer.valueOf(positionB)));
+                                    db.addBle(new ble(Integer.valueOf(idB),macB,Integer.valueOf(roomIdB),positionB));
 
                                 }
                             }
@@ -201,14 +211,16 @@ public class place_page extends Activity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 if (listBuilding.size()>0){
+                    Log.d("select "+listBuilding.get(position).getId(),msLog);
                     Intent myIntent = new Intent(place_page.this,create_page.class);
-                    myIntent.putExtra("placeId",String.valueOf(listBuilding.get(position).getId()));
+                    myIntent.putExtra("buildingId",String.valueOf(listBuilding.get(position).getId()));
                     startActivity(myIntent);
                     finish();
                 }
                 //swap_page(CREATING_PAGE);
             }
         });
+        db.close();
         Log.d("Finish", log);
     }
 }

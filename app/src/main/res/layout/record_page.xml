@@ -26,17 +26,17 @@
     <Button
         android:text="BLE"
         android:id="@+id/menu1"
-        android:layout_above="@+id/menu2"
-        android:layout_width="100dp"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"/>
-    <Button
-        android:text="Corner"
-        android:id="@+id/menu2"
         android:layout_width="100dp"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"/>
     <Button
+        android:text="Corner"
+        android:id="@+id/menu2"
+        android:layout_width="100dp"
+        android:layout_below="@+id/menu1"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"/>
+    <!--Button
         android:text="Door"
         android:id="@+id/menu3"
         android:layout_width="100dp"
@@ -56,7 +56,7 @@
         android:layout_below="@+id/menu4"
         android:layout_width="100dp"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"/>
+        android:layout_centerHorizontal="true"/-->
     <Button
         android:text="Finish"
         android:id="@+id/finish"

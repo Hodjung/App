@@ -21,7 +21,7 @@ import java.util.List;
  * Created by KridsadaTh on 24/2/2558.
  */
 public class manage_floor extends Activity {
-    int floorId,placeId;
+    int floorId,buildingId;
     ArrayList<String> group;
     ListView planRoom;
     ArrayAdapter<String> adapterRoom;
@@ -36,11 +36,11 @@ public class manage_floor extends Activity {
         setContentView(R.layout.manage_floor_page);
         Bundle extras=getIntent().getExtras();
         floorId=Integer.parseInt(extras.getString("floorId"));
-        placeId=Integer.parseInt(extras.getString("placeId"));
+        buildingId=Integer.parseInt(extras.getString("buildingId"));
         Log.d("TEST:"+floorId,"checkLog");
         final floor currentFloor;
         db=new Database(this);
-        Log.d("Place ID="+placeId,"checkLog");
+        Log.d("buildingId ID="+buildingId,"checkLog");
         currentFloor=db.getFloor(floorId);
         listRoom=db.getAllRoom(currentFloor.getId());
         planRoom = (ListView)findViewById(R.id.listView);
@@ -52,7 +52,7 @@ public class manage_floor extends Activity {
             @Override
             public void onClick(View v) {
                 Intent myIntent=new Intent(manage_floor.this,config_room.class);
-                myIntent.putExtra("placeId",String.valueOf(placeId));
+                myIntent.putExtra("buildingId",String.valueOf(buildingId));
                 myIntent.putExtra("floorId",String.valueOf(currentFloor.getId()));
                 startActivity(myIntent);
                 finish();
@@ -63,7 +63,7 @@ public class manage_floor extends Activity {
             @Override
             public void onClick(View v) {
                 Intent myIntent=new Intent(manage_floor.this,create_page.class);
-                myIntent.putExtra("placeId",String.valueOf(placeId));
+                myIntent.putExtra("buildingId",String.valueOf(buildingId));
                 startActivity(myIntent);
                 finish();
             }
@@ -87,9 +87,9 @@ public class manage_floor extends Activity {
                         public void onClick(DialogInterface dialog, int which) {
                             if (which==0){
                                 currentRoom=listRoom.get(position);
-                                Log.d("check"+placeId+" "+floorId+" "+currentRoom.getId(),"checkLog");
+                                Log.d("check"+buildingId+" "+floorId+" "+currentRoom.getId(),"checkLog");
                                 Intent myIntent = new Intent(manage_floor.this,record_page.class);
-                                myIntent.putExtra("placeId",String.valueOf(placeId));
+                                myIntent.putExtra("buildingId",String.valueOf(buildingId));
                                 myIntent.putExtra("floorId",String.valueOf(floorId));
                                 myIntent.putExtra("roomId",String.valueOf(currentRoom.getId()));
                                 startActivity(myIntent);

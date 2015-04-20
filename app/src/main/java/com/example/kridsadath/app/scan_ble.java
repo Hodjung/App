@@ -47,7 +47,7 @@ public class scan_ble extends Activity {
                         @Override
                         public void run() {//UT9
                             if (device.getName()!=null) { //TODO:ดักเนาไว้นะจ้ะ
-                                Log.e("error_wai", "dev:" + device.toString());
+                                Log.e("error", "dev:" + device.toString());
                                 if (device.getName().equals("UT9")) {
                                     int positionInList = positionInList(device);
                                     receiveSignalAndSetPositionDevice(positionInList, rssi);

@@ -9,7 +9,19 @@ public class room{
     double heightFloor;
     int width,height,rangeOfDevice;
     String name,detail;
+    public room(int id,String name,String detail,int floorId,boolean isClose,double heightFloor,int width,int height,int rangeOfDevice){
+        this.id=id;
+        this.floorId=floorId;
+        this.isClose=isClose;
+        this.name=name;
+        this.detail=detail;
+        this.heightFloor=heightFloor;
+        this.height=height;
+        this.width=width;
+        this.rangeOfDevice=rangeOfDevice;
+    }
     public room(String name,String detail,int floorId,boolean isClose,double heightFloor,int width,int height,int rangeOfDevice){
+        this.id=id;
         this.floorId=floorId;
         this.isClose=isClose;
         this.name=name;

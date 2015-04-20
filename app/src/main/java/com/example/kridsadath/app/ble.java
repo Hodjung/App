@@ -4,9 +4,15 @@ package com.example.kridsadath.app;
  * Created by KridsadaTh on 22/2/2558.
  */
 public class ble {
-    int id,roomId,position;
-    String macId;
-    public ble(String macId,int roomId,int position){
+    int id,roomId;
+    String macId,position;
+    public ble(int id,String macId,int roomId,String position){
+        this.id=id;
+        this.macId=macId;
+        this.roomId=roomId;
+        this.position=position;
+    }
+    public ble(String macId,int roomId,String position){
         this.macId=macId;
         this.roomId=roomId;
         this.position=position;
@@ -15,5 +21,5 @@ public class ble {
     int getId(){return this.id;}
     String getMacId() {return this.macId;}
     int getRoomId() {return this.roomId;}
-    int getPosition() {return this.position;}
+    String getPosition() {return this.position;}
 }

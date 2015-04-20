@@ -7,11 +7,17 @@ import java.util.ArrayList;
  */
 public class floor{
     int id,placeId;
-    String name;
-    ArrayList<room> room;
-    public floor(String name,int placeId){
+    String name,imageId;
+    public floor(int id,String name,int placeId,String imageId){
+        this.id=id;
         this.name=name;
         this.placeId=placeId;
+        this.imageId=imageId;
+    }
+    public floor(String name,int placeId,String imageId){
+        this.name=name;
+        this.placeId=placeId;
+        this.imageId=imageId;
     }
 
     public floor(floor floor) {
@@ -33,5 +39,6 @@ public class floor{
         return id;
     }
     int getPlaceId(){return placeId;}
+    String getImageId(){return imageId;}
 }
 

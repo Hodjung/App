@@ -12,7 +12,7 @@ import android.widget.TextView;
  * Created by KridsadaTh on 24/2/2558.
  */
 public class record_page extends Activity {
-    int placeId,floorId,roomId;
+    int buildingId,floorId,roomId;
     floor currentFloor;
     room currentRoom;
     Database db;
@@ -23,10 +23,10 @@ public class record_page extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.record_page);
         Bundle intent = getIntent().getExtras();
-        placeId=Integer.parseInt(intent.getString("placeId"));
-        floorId=Integer.parseInt(intent.getString("floorId"));
-        roomId=Integer.parseInt(intent.getString("roomId"));
-        Log.d("placeId="+placeId+" floorId="+floorId+" roomId="+roomId,"checkLog");
+        buildingId=Integer.valueOf(intent.getString("buildingId"));
+        floorId=Integer.valueOf(intent.getString("floorId"));
+        roomId=Integer.valueOf(intent.getString("roomId"));
+        Log.d("buildingId="+buildingId+" floorId="+floorId+" roomId="+roomId,"checkLog");
         db=new Database(this);
         currentFloor=db.getFloor(floorId);
         currentRoom=db.getRoom(roomId);
@@ -36,14 +36,14 @@ public class record_page extends Activity {
         name_room.setText(currentRoom.getName());
         Button ble=(Button)findViewById(R.id.menu1);
         Button corner=(Button)findViewById(R.id.menu2);
-        Button door=(Button)findViewById(R.id.menu3);
+        /*Button door=(Button)findViewById(R.id.menu3);
         Button pin=(Button)findViewById(R.id.menu4);
-        Button test=(Button)findViewById(R.id.menu5);
+        Button test=(Button)findViewById(R.id.menu5);*/
         ble.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent myIntent = new Intent(record_page.this,scan_ble.class);
-                myIntent.putExtra("placeId",String.valueOf(placeId));
+                myIntent.putExtra("buildingId",String.valueOf(buildingId));
                 myIntent.putExtra("floorId",String.valueOf(floorId));
                 myIntent.putExtra("roomId",String.valueOf(roomId));
                 startActivity(myIntent);
@@ -60,7 +60,7 @@ public class record_page extends Activity {
                 startActivity(myIntent);
             }
         });
-        door.setOnClickListener(new View.OnClickListener() {
+        /*door.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent myIntent = new Intent(record_page.this,menu_ble.class);
@@ -88,14 +88,14 @@ public class record_page extends Activity {
                 myIntent.putExtra("menu","test");
                 startActivity(myIntent);
             }
-        });
+        });*/
         Button finish=(Button)findViewById(R.id.finish);
         finish.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //swap_page(ADD_ROOM_PAGE);
                 Intent myIntent=new Intent(record_page.this,manage_floor.class);
-                myIntent.putExtra("placeId",String.valueOf(placeId));
+                myIntent.putExtra("buildingId",String.valueOf(buildingId));
                 myIntent.putExtra("floorId",String.valueOf(floorId));
                 startActivity(myIntent);
                 finish();

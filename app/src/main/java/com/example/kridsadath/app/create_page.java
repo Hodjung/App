@@ -33,27 +33,27 @@ import java.util.List;
 public class create_page extends Activity {
     String log="checkLog";
     int buildingId;
-    building currentBuilding;
-    String buildingName;
+    building currentBuilding=null;
     Database db;
     private List<floor> floor;
     ListView listView;
     ArrayAdapter<String> adapter;
     private ProgressDialog pDialog;
     JSONParser jParser = new JSONParser();
-    JSONArray products = null;
+    //JSONArray products = null;
     static String url_save="http://192.168.137.1/save.php";
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.create_page);
         Bundle extras=getIntent().getExtras();
-        buildingId=Integer.parseInt(extras.getString("placeId"));
+        buildingId=Integer.parseInt(extras.getString("buildingId"));
         TextView building=(TextView)findViewById(R.id.root_text);
+        Log.d(buildingId+"",log);
         db=new Database(this);
         currentBuilding=db.getBuilding(buildingId);
-        buildingName=currentBuilding.getName();
-        building.setText(buildingName);
+        building.setText(currentBuilding.getName());
+        Log.d("before set view",log);
         setView();
         final AlertDialog.Builder boxOption = new AlertDialog.Builder(this);
         final String[] option_header = new String[] { "Manage", "Rename" };
@@ -67,7 +67,7 @@ public class create_page extends Activity {
                     public void onClick(DialogInterface dialog, int which) {
                         if (which==0){
                             Intent myIntent=new Intent(create_page.this,manage_floor.class);
-                            myIntent.putExtra("placeId",String.valueOf(buildingId));
+                            myIntent.putExtra("buildingId",String.valueOf(buildingId));
                             myIntent.putExtra("floorId",String.valueOf(floor.get(position).getId()));
                             Log.d(floor.get(position).getId()+"","checkLog");
                             startActivity(myIntent);
@@ -138,7 +138,7 @@ public class create_page extends Activity {
             // Building Parameters
             List<NameValuePair> params = new ArrayList<NameValuePair>();
             params.add(new BasicNameValuePair("id", String.valueOf(currentBuilding.getId())));
-            params.add(new BasicNameValuePair("place", currentBuilding.getName()));
+            params.add(new BasicNameValuePair("name", currentBuilding.getName()));
             params.add(new BasicNameValuePair("latitude",String.valueOf(currentBuilding.getLatitude())));
             params.add(new BasicNameValuePair("longitude",String.valueOf(currentBuilding.getLongitude())));
             // getting JSON Object
@@ -183,8 +183,9 @@ public class create_page extends Activity {
                 for (int i=0;i<listFloor.size();i++) {
                     List<NameValuePair> params_floor = new ArrayList<NameValuePair>();
                     params_floor.add(new BasicNameValuePair("id", String.valueOf(listFloor.get(i).getId())));
-                    params_floor.add(new BasicNameValuePair("floor", listFloor.get(i).getName()));
+                    params_floor.add(new BasicNameValuePair("name", listFloor.get(i).getName()));
                     params_floor.add(new BasicNameValuePair("buildingId", String.valueOf(listFloor.get(i).getPlaceId())));
+                    params_floor.add(new BasicNameValuePair("imageId", listFloor.get(i).getImageId()));
                     // getting JSON Object
                     // Note that create product url accepts POST method
                     JSONObject json_floor = jParser.makeHttpRequest(url_save, "POST", params_floor);
@@ -230,13 +231,13 @@ public class create_page extends Activity {
                         for (int j = 0; j < listRoom.size(); j++) {
                             List<NameValuePair> params_room = new ArrayList<NameValuePair>();
                             params_room.add(new BasicNameValuePair("id", String.valueOf(listRoom.get(j).getId())));
-                            params_room.add(new BasicNameValuePair("room", listRoom.get(j).getName()));
+                            params_room.add(new BasicNameValuePair("name", listRoom.get(j).getName()));
                             params_room.add(new BasicNameValuePair("detail", listRoom.get(j).getDetail()));
-                            params_room.add(new BasicNameValuePair("heightFloor", String.valueOf(listRoom.get(j).getHeightFloor())));
+                            params_room.add(new BasicNameValuePair("height", String.valueOf(listRoom.get(j).getHeightFloor())));
                             params_room.add(new BasicNameValuePair("isClose", String.valueOf(listRoom.get(j).getIsClose())));
                             params_room.add(new BasicNameValuePair("width", String.valueOf(listRoom.get(j).getWidth())));
-                            params_room.add(new BasicNameValuePair("height", String.valueOf(listRoom.get(j).getHeight())));
-                            params_room.add(new BasicNameValuePair("rangeBetween", String.valueOf(listRoom.get(j).getRange())));
+                            params_room.add(new BasicNameValuePair("depth", String.valueOf(listRoom.get(j).getHeight())));
+                            params_room.add(new BasicNameValuePair("range", String.valueOf(listRoom.get(j).getRange())));
                             params_room.add(new BasicNameValuePair("floorId", String.valueOf(listRoom.get(j).getFloorId())));
                             // getting JSON Object
                             // Note that create product url accepts POST method

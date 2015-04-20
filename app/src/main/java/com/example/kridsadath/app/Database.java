@@ -122,40 +122,6 @@ final class Database extends SQLiteOpenHelper {
         // Create tables again
         onCreate(db);
     }
-    /*int addPin(int floorId,String name,String info,int type,float x,float y){
-        int id=0;
-        ContentValues values = new ContentValues();
-        values.put(KEY_FLOOR_ID,floorId);
-        values.put(KEY_NAME,name);
-        values.put(KEY_INFO,info);
-        values.put(KEY_TYPE,type);
-        values.put(KEY_X,x);
-        values.put(KEY_Y,y);
-        SQLiteDatabase db = this.getWritableDatabase();
-        id= (int) db.insert(TABLE_PIN,null,values);
-        db.close();
-        return id;
-    }
-    void deletePin(int roomId) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        db.delete(TABLE_PIN, "roomId" + " = ?",
-                new String[] { String.valueOf(roomId) });
-        db.close();
-    }
-    public List<pin> getPin(int roomId){
-        SQLiteDatabase db=this.getReadableDatabase();
-        List<pin> list=null;
-        String selectQuery = "SELECT * FROM "+TABLE_PIN+" WHERE "+KEY_ROOM_ID+"=?";
-        Cursor cursor = db.rawQuery(selectQuery,new String[]{String.valueOf(roomId)});
-
-        if (cursor.moveToFirst()){
-            list=new ArrayList<pin>();
-            do {
-                list.add(new pin(Integer.parseInt(cursor.getString(1)),cursor.getString(2),Float.parseFloat(cursor.getString(3)),Float.parseFloat(cursor.getString(4))));
-            }while(cursor.moveToNext());
-        }
-        return list;
-    }*/
     int addCorner(int roomId,String macAddress,int position){
         int id=0;
         ContentValues values = new ContentValues();
@@ -167,12 +133,12 @@ final class Database extends SQLiteOpenHelper {
         db.close();
         return id;
     }
-    /*void deleteCorner(int roomId) {
+    void deleteCorner(int roomId) {
         SQLiteDatabase db = this.getWritableDatabase();
         db.delete(TABLE_CORNER, KEY_ROOM_ID + " = ?",
                 new String[] { String.valueOf(roomId) });
         db.close();
-    }*/
+    }
     public List<corner> getCorner(int roomId){
         SQLiteDatabase db=this.getReadableDatabase();
         List<corner> list=null;
@@ -198,6 +164,7 @@ final class Database extends SQLiteOpenHelper {
         //0id INTEGER PRIMARY KEY AUTOINCREMENT,1room TEXT,2detail TEXT,3heightFloor INTEGER,4isClose BOOLEAN,
         //5width INTEGER,6height INTEGER,7rangeBle INTEGER,8floorId INTEGER
         ContentValues values = new ContentValues();
+        values.put(KEY_ID, ble.getId());
         values.put(KEY_MAC, ble.getMacId());
         values.put(KEY_ROOM_ID, ble.getRoomId());
         values.put(KEY_POSITION, ble.getPosition());
@@ -279,6 +246,7 @@ final class Database extends SQLiteOpenHelper {
         //0id INTEGER PRIMARY KEY AUTOINCREMENT,1room TEXT,2detail TEXT,3heightFloor INTEGER,4isClose BOOLEAN,
         //5width INTEGER,6height INTEGER,7rangeBle INTEGER,8floorId INTEGER
         ContentValues values = new ContentValues();
+        values.put(KEY_ID, room.getId());
         values.put(KEY_NAME, room.getName());
         values.put(KEY_DETAIL, room.getDetail());
         values.put(KEY_HEIGHT, room.getHeightFloor());
@@ -301,11 +269,10 @@ final class Database extends SQLiteOpenHelper {
         if (cursor != null)
             cursor.moveToFirst();
 
-        room get_room = new room(cursor.getString(1),cursor.getString(2),Integer.parseInt(cursor.getString(8)),
+        room get_room = new room(Integer.parseInt(cursor.getString(0)),cursor.getString(1),cursor.getString(2),Integer.parseInt(cursor.getString(8)),
                 Boolean.parseBoolean(cursor.getString(4)),Double.parseDouble(cursor.getString(3)),
                 Integer.parseInt(cursor.getString(5)),Integer.parseInt(cursor.getString(6)),
                 Integer.parseInt(cursor.getString(7)));
-        get_room.setId(Integer.parseInt(cursor.getString(0)));
         return get_room;
     }
     // Getting All rooms
@@ -327,11 +294,10 @@ final class Database extends SQLiteOpenHelper {
                 //--------------------------------------------------------------------------
                 //name,detail,floorId,isClose,heightFloor,width,height,rangeOfDevice
                 //String,String,int,boolean,double,int,int,int
-                room room = new room(cursor.getString(1),cursor.getString(2),Integer.parseInt(cursor.getString(8)),
+                room room = new room(Integer.parseInt(cursor.getString(0)),cursor.getString(1),cursor.getString(2),Integer.parseInt(cursor.getString(8)),
                         Boolean.parseBoolean(cursor.getString(4)),Double.parseDouble(cursor.getString(3)),
                         Integer.parseInt(cursor.getString(5)),Integer.parseInt(cursor.getString(6)),
                         Integer.parseInt(cursor.getString(7)));
-                room.setId(Integer.parseInt(cursor.getString(0)));
                 // Adding floor to list
                 roomList.add(room);
             } while (cursor.moveToNext());
@@ -365,6 +331,7 @@ final class Database extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
+        values.put(KEY_ID, floor.getId());
         values.put(KEY_NAME, floor.getName());
         values.put(KEY_BUILDING_ID, floor.getPlaceId());
 
@@ -382,15 +349,14 @@ final class Database extends SQLiteOpenHelper {
         Cursor cursor = db.rawQuery(selectQuery, new String[]{String.valueOf(id)});
         if (cursor != null)
             cursor.moveToFirst();
-        floor floor = new floor(cursor.getString(1),Integer.parseInt(cursor.getString(2)));
-        floor.setId(Integer.parseInt(cursor.getString(0)));
+        floor floor = new floor(Integer.parseInt(cursor.getString(0)),cursor.getString(1),Integer.parseInt(cursor.getString(2)),cursor.getString(3));
         return floor;
     }
     // Getting All places
     public List<floor> getAllFloor(int placeId) {
         List<floor> floorList = null;
         // Select All Query
-        String selectQuery = "SELECT  * FROM " + TABLE_FLOOR + " WHERE placeId=?";
+        String selectQuery = "SELECT  * FROM " + TABLE_FLOOR + " WHERE buildingId=?";
 
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, new String[]{String.valueOf(placeId)});
@@ -401,8 +367,7 @@ final class Database extends SQLiteOpenHelper {
         if (cursor.moveToFirst()) {
             floorList=new ArrayList<floor>();
             do {
-                floor floor = new floor(cursor.getString(1),Integer.parseInt(cursor.getString(2)));
-                floor.setId(Integer.parseInt(cursor.getString(0)));
+                floor floor = new floor(Integer.parseInt(cursor.getString(0)),cursor.getString(1),Integer.parseInt(cursor.getString(2)),cursor.getString(3));
                 // Adding floor to list
                 floorList.add(floor);
             } while (cursor.moveToNext());
@@ -436,10 +401,11 @@ final class Database extends SQLiteOpenHelper {
 
     // Adding new Building
     int addBuilding(building building) {
-        Log.d("Add Place","checkLog");
+        Log.d("Add Building","checkLog");
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
+        values.put(KEY_ID, building.getId());
         values.put(KEY_NAME, building.getName()); // Contact Name
         values.put(KEY_LATITUDE, building.getLatitude());
         values.put(KEY_LONGITUDE, building.getLongitude());
@@ -456,23 +422,26 @@ final class Database extends SQLiteOpenHelper {
     building getBuilding(int id) {
         SQLiteDatabase db = this.getReadableDatabase();
 
-        Cursor cursor = db.query(TABLE_BUILDING, new String[] { KEY_ID, KEY_NAME, KEY_LATITUDE, KEY_LONGITUDE},
-                KEY_ID + "=?",new String[] { String.valueOf(id) }, null, null, null, null);
-        if (cursor != null)
-            cursor.moveToFirst();
-
-        //place contact = new place(Integer.parseInt(cursor.getString(0)),cursor.getString(1), cursor.getString(2));
-        // return contact
-        building building = new building(cursor.getString(1));
-        building.setId(Integer.parseInt(cursor.getString(0)));
-        return building;
+        String selectQuery = "SELECT * FROM " + TABLE_BUILDING +" WHERE "+KEY_ID+"=?";
+        Cursor cursor = db.rawQuery(selectQuery, new String[]{String.valueOf(id)});
+        /*Cursor cursor = db.query(TABLE_BUILDING, new String[] { KEY_ID, KEY_NAME, KEY_LATITUDE, KEY_LONGITUDE},
+                KEY_ID + "=?",new String[] { String.valueOf(id) }, null, null, null, null);*/
+        if (cursor.moveToFirst()){
+            Log.d("NOT NULL"+selectQuery,"checkLog");
+            Log.d("data:"+cursor.getString(0)+cursor.getString(1)+cursor.getString(2)+cursor.getString(3),"checkLog");
+            return new building(Integer.parseInt(cursor.getString(0)),cursor.getString(1),Float.parseFloat(cursor.getString(2)),Float.parseFloat(cursor.getString(3)));
+        }
+        else {
+            Log.d("NULL","checkLog");
+            return null;
+        }
     }
 
     // Getting All Building
     public List<building> getAllBuilding() {
         List<building> buildingList = new ArrayList<building>();
         // Select All Query
-        String selectQuery = "SELECT  * FROM " + TABLE_BUILDING;
+        String selectQuery = "SELECT * FROM " + TABLE_BUILDING;
 
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
@@ -483,7 +452,7 @@ final class Database extends SQLiteOpenHelper {
                 building building = new building();
                 building.setId(Integer.parseInt(cursor.getString(0)));
                 building.setName(cursor.getString(1));
-                building.setNumberFloor(cursor.getString(2));
+                //building.setNumberFloor(cursor.getString(2));
                 // Adding contact to list
                 buildingList.add(building);
             } while (cursor.moveToNext());
@@ -511,15 +480,4 @@ final class Database extends SQLiteOpenHelper {
                 new String[] { String.valueOf(building) });
         db.close();
     }
-
-    // Getting places Count
-    /*public int getBuildingCount() {
-        String countQuery = "SELECT  * FROM " + TABLE_BUILDING;
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery(countQuery, null);
-        cursor.close();
-
-        // return count
-        return cursor.getCount();
-    }*/
 }

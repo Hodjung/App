@@ -27,14 +27,14 @@ public class initial_page extends Activity {
                 if (!txt.getText().toString().isEmpty()){
                     String name =txt.getText().toString();
                     int n_floor= Integer.parseInt(txt2.getText().toString());
-                    place place=new place(name,n_floor);
-                    place.setId(db.addPlace(place));
+                    building building=new building(name,0,0);
+                    //building.setId(db.addBuilding(building));
                     for (int i=0;i<n_floor;i++){
-                        int id=db.addFloor(new floor("Floor "+(i+1),place.getId()));
+                        int id=db.addFloor(new floor("Floor "+(i+1),building.getId(),"NULL"));
                         Log.d("Floor ID ="+id,"checkLog");
                     }
                     Intent myIntent=new Intent(initial_page.this,create_page.class);
-                    myIntent.putExtra("placeId",String.valueOf(place.getId()));
+                    myIntent.putExtra("placeId",String.valueOf(building.getId()));
                     startActivity(myIntent);
                     finish();
                 }
