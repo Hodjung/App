@@ -41,7 +41,6 @@ public class create_page extends Activity {
     private ProgressDialog pDialog;
     JSONParser jParser = new JSONParser();
     //JSONArray products = null;
-    static String url_save="http://192.168.137.1/save.php";
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -122,208 +121,8 @@ public class create_page extends Activity {
             }
         });
     }
-    class CreateBuilding extends AsyncTask<String,String,String>{
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            pDialog = new ProgressDialog(create_page.this);
-            pDialog.setMessage("Sending Place to Server. Please wait...");
-            pDialog.setIndeterminate(false);
-            pDialog.setCancelable(false);
-            pDialog.show();
-        }
 
-        @Override
-        protected String doInBackground(String... args) {
-            // Building Parameters
-            List<NameValuePair> params = new ArrayList<NameValuePair>();
-            params.add(new BasicNameValuePair("id", String.valueOf(currentBuilding.getId())));
-            params.add(new BasicNameValuePair("name", currentBuilding.getName()));
-            params.add(new BasicNameValuePair("latitude",String.valueOf(currentBuilding.getLatitude())));
-            params.add(new BasicNameValuePair("longitude",String.valueOf(currentBuilding.getLongitude())));
-            // getting JSON Object
-            // Note that create product url accepts POST method
-            //Log.d(params.toString(),"checkLog");
-            JSONObject json = jParser.makeHttpRequest(url_save, "POST", params);
-            //Log.d(json.toString(),"checkLog");
-            // Check your log cat for JSON reponse
-            try {
-                // Checking for SUCCESS TAG
-                int success = json.getInt("success");
-                if (success == 1){}
-                else {}
-            } catch (JSONException e){
-                e.printStackTrace();
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(String s) {
-            pDialog.dismiss();
-            new CreateFloor().execute();
-        }
-    }
-    class CreateFloor extends AsyncTask<String,String,String>{
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            pDialog = new ProgressDialog(create_page.this);
-            pDialog.setMessage("Sending Floor to Server. Please wait...");
-            pDialog.setIndeterminate(false);
-            pDialog.setCancelable(false);
-            pDialog.show();
-        }
-
-        @Override
-        protected String doInBackground(String... args) {
-            List<floor> listFloor=new ArrayList<floor>();
-            listFloor=db.getAllFloor(currentBuilding.getId());
-            if (listFloor!=null){
-                for (int i=0;i<listFloor.size();i++) {
-                    List<NameValuePair> params_floor = new ArrayList<NameValuePair>();
-                    params_floor.add(new BasicNameValuePair("id", String.valueOf(listFloor.get(i).getId())));
-                    params_floor.add(new BasicNameValuePair("name", listFloor.get(i).getName()));
-                    params_floor.add(new BasicNameValuePair("buildingId", String.valueOf(listFloor.get(i).getPlaceId())));
-                    params_floor.add(new BasicNameValuePair("imageId", listFloor.get(i).getImageId()));
-                    // getting JSON Object
-                    // Note that create product url accepts POST method
-                    JSONObject json_floor = jParser.makeHttpRequest(url_save, "POST", params_floor);
-                    try {
-                        // Checking for SUCCESS TAG
-                        int success = json_floor.getInt("success");
-                        if (success == 1){}
-                        else {}
-                    } catch (JSONException e){
-                        e.printStackTrace();
-                    }
-                }
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(String s) {
-            pDialog.dismiss();
-            new CreateRoom().execute();
-        }
-    }
-    class CreateRoom extends AsyncTask<String,String,String>{
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            pDialog = new ProgressDialog(create_page.this);
-            pDialog.setMessage("Sending Room to Server. Please wait...");
-            pDialog.setIndeterminate(false);
-            pDialog.setCancelable(false);
-            pDialog.show();
-        }
-
-        @Override
-        protected String doInBackground(String... args) {
-            List<floor> listFloor=new ArrayList<floor>();
-            listFloor=db.getAllFloor(currentBuilding.getId());
-            if (listFloor!=null) {
-                for (int i = 0; i < listFloor.size(); i++) {
-                    List<room> listRoom = new ArrayList<room>();
-                    listRoom = db.getAllRoom(listFloor.get(i).getId());
-                    if (listRoom != null) {
-                        for (int j = 0; j < listRoom.size(); j++) {
-                            List<NameValuePair> params_room = new ArrayList<NameValuePair>();
-                            params_room.add(new BasicNameValuePair("id", String.valueOf(listRoom.get(j).getId())));
-                            params_room.add(new BasicNameValuePair("name", listRoom.get(j).getName()));
-                            params_room.add(new BasicNameValuePair("detail", listRoom.get(j).getDetail()));
-                            params_room.add(new BasicNameValuePair("height", String.valueOf(listRoom.get(j).getHeightFloor())));
-                            params_room.add(new BasicNameValuePair("isClose", String.valueOf(listRoom.get(j).getIsClose())));
-                            params_room.add(new BasicNameValuePair("width", String.valueOf(listRoom.get(j).getWidth())));
-                            params_room.add(new BasicNameValuePair("depth", String.valueOf(listRoom.get(j).getHeight())));
-                            params_room.add(new BasicNameValuePair("range", String.valueOf(listRoom.get(j).getRange())));
-                            params_room.add(new BasicNameValuePair("floorId", String.valueOf(listRoom.get(j).getFloorId())));
-                            // getting JSON Object
-                            // Note that create product url accepts POST method
-                            Log.d(params_room.toString(),"checkLog");
-                            JSONObject json_room = jParser.makeHttpRequest(url_save, "POST", params_room);
-                            Log.d(json_room.toString(),"checkLog");
-                            try {
-                                // Checking for SUCCESS TAG
-                                int success = json_room.getInt("success");
-                                if (success == 1) {
-                                } else {
-                                }
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    }
-                }
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(String s) {
-            pDialog.dismiss();
-            new CreateBle().execute();
-        }
-    }
-    class CreateBle extends AsyncTask<String,String,String>{
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            pDialog = new ProgressDialog(create_page.this);
-            pDialog.setMessage("Sending Ble to Server. Please wait...");
-            pDialog.setIndeterminate(false);
-            pDialog.setCancelable(false);
-            pDialog.show();
-        }
-
-        @Override
-        protected String doInBackground(String... args) {
-            List<floor> listFloor=new ArrayList<floor>();
-            listFloor=db.getAllFloor(currentBuilding.getId());
-            if (listFloor!=null) {
-                for (int i = 0; i < listFloor.size(); i++) {
-                    List<room> listRoom = new ArrayList<room>();
-                    listRoom = db.getAllRoom(listFloor.get(i).getId());
-                    if (listRoom != null) {
-                        for (int j = 0; j < listRoom.size(); j++) {
-                            List<ble> listBle=new ArrayList<ble>();
-                            listBle=db.getAllBle(listRoom.get(j).getId());
-                            if (listBle!=null){
-                                for (int k=0;k<listBle.size();k++){
-                                    List<NameValuePair> params_ble = new ArrayList<NameValuePair>();
-                                    params_ble.add(new BasicNameValuePair("id", String.valueOf(listBle.get(k).getId())));
-                                    params_ble.add(new BasicNameValuePair("macAddress", listBle.get(k).getMacId()));
-                                    params_ble.add(new BasicNameValuePair("roomId", String.valueOf(listBle.get(k).getRoomId())));
-                                    params_ble.add(new BasicNameValuePair("position", String.valueOf(listBle.get(k).getPosition())));
-                                    // getting JSON Object
-                                    // Note that create product url accepts POST method
-                                    JSONObject json_ble = jParser.makeHttpRequest(url_save, "POST", params_ble);
-                                    try {
-                                        // Checking for SUCCESS TAG
-                                        int success = json_ble.getInt("success");
-                                        if (success == 1) {
-                                        } else {
-                                        }
-                                    } catch (JSONException e) {
-                                        e.printStackTrace();
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(String s) {
-            pDialog.dismiss();
-            new CreateCorner().execute();
-        }
-    }
-    class CreateCorner extends AsyncTask<String,String,String>{
+    /*class CreateCorner extends AsyncTask<String,String,String>{
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
@@ -380,7 +179,7 @@ public class create_page extends Activity {
             //new CreatePin().execute();
         }
     }
-
+*/
     void boxRename (final floor floor){
         AlertDialog.Builder renameBox = new AlertDialog.Builder(this);
         renameBox.setTitle("Rename " + floor.getName());

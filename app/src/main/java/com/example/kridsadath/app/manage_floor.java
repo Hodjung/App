@@ -100,27 +100,7 @@ public class manage_floor extends Activity {
                                 boxRename(listRoom.get(position));
                             }
                             else {
-                                //delete
-                                /*List<ble> listBle=new ArrayList<ble>();
-                                listBle=db.getAllBle(currentRoom.getId());
-                                for (int i=0;i<listBle.size();i++){
-                                    db.deleteBle(listBle.get(i));
-                                }*/
-                                /*List<corner> listCorner=new ArrayList<corner>();
-                                listCorner=db.getCorner(currentRoom.getId());
-                                for (int i=0;i<listCorner.size();i++){
-                                    db.deleteCorner(currentRoom.getId());
-                                }*/
-                                /*
-                                List<door> listDoor=new ArrayList<door>();
-                                for (int i=0;i<listDoor.size();i++){
-                                    db.deleteDoor(currentRoom.getId());
-                                }*/
-                                /*List<pin> listPin=new ArrayList<pin>();
-                                for (int i=0;i<listPin.size();i++){
-                                    db.deletePin();
-                                }*/
-                                //db.deleteRoom(currentRoom);
+                                //TODO:delete
                                 setView();
                             }
                         }

@@ -266,14 +266,14 @@ final class Database extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getReadableDatabase();
         String selectQuery = "SELECT  * FROM " + TABLE_ROOM + " WHERE "+KEY_ID+"=?";
         Cursor cursor = db.rawQuery(selectQuery,new String[]{String.valueOf(id)});
-        if (cursor != null)
-            cursor.moveToFirst();
-
-        room get_room = new room(Integer.parseInt(cursor.getString(0)),cursor.getString(1),cursor.getString(2),Integer.parseInt(cursor.getString(8)),
-                Boolean.parseBoolean(cursor.getString(4)),Double.parseDouble(cursor.getString(3)),
-                Integer.parseInt(cursor.getString(5)),Integer.parseInt(cursor.getString(6)),
-                Integer.parseInt(cursor.getString(7)));
-        return get_room;
+        if (cursor.moveToFirst()){
+            room get_room = new room(Integer.parseInt(cursor.getString(0)),cursor.getString(1),cursor.getString(2),Integer.parseInt(cursor.getString(8)),
+                    Boolean.parseBoolean(cursor.getString(4)),Double.parseDouble(cursor.getString(3)),
+                    Integer.parseInt(cursor.getString(5)),Integer.parseInt(cursor.getString(6)),
+                    Integer.parseInt(cursor.getString(7)));
+            return get_room;
+        }
+        return null;
     }
     // Getting All rooms
     public List<room> getAllRoom(int floorId) {
@@ -479,5 +479,19 @@ final class Database extends SQLiteOpenHelper {
         db.delete(TABLE_BUILDING, KEY_ID + " = ?",
                 new String[] { String.valueOf(building) });
         db.close();
+    }
+    public int getBuildingId(String name){
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        String selectQuery = "SELECT * FROM " + TABLE_BUILDING +" WHERE "+KEY_NAME+"=?";
+        Cursor cursor = db.rawQuery(selectQuery, new String[]{String.valueOf(name)});
+        /*Cursor cursor = db.query(TABLE_BUILDING, new String[] { KEY_ID, KEY_NAME, KEY_LATITUDE, KEY_LONGITUDE},
+                KEY_ID + "=?",new String[] { String.valueOf(id) }, null, null, null, null);*/
+        if (cursor.moveToFirst()){
+            Log.d("NOT NULL"+selectQuery,"checkLog");
+            Log.d("data:"+cursor.getString(0)+cursor.getString(1)+cursor.getString(2)+cursor.getString(3),"checkLog");
+            return Integer.parseInt(cursor.getString(0));
+        }
+        return 0;
     }
 }

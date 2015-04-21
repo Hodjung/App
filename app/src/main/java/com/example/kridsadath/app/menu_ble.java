@@ -2,12 +2,14 @@ package com.example.kridsadath.app;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Canvas;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.util.Log;
@@ -17,10 +19,17 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Created by KridsadaTh on 1/3/2558.
@@ -28,7 +37,6 @@ import java.util.List;
 
 public class menu_ble extends Activity {
     int roomId  ;
-    Database db;
     List<ble> listBle;
     Button btn1,btn2,btn3;
     RelativeLayout layout;
@@ -36,6 +44,9 @@ public class menu_ble extends Activity {
     int countN;
     int noCorner;
     List<TextView> text;
+    Database db;
+    private ProgressDialog pDialog;
+    JSONParser jParser = new JSONParser();
     public menu_ble(){}
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,10 +61,16 @@ public class menu_ble extends Activity {
         text.add((TextView) findViewById(R.id.textView4));
         db=new Database(this);
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        if (!mBluetoothAdapter.isEnabled()) {
+        if (mBluetoothAdapter==null){
+            Toast toast=Toast.makeText(this,"Bluetooth not available",Toast.LENGTH_SHORT);
+            toast.show();
+            finish();
+        }
+        else if (!mBluetoothAdapter.isEnabled()) {
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableBtIntent, 1);
         }
+        listNearCorner=null;
         listBle=db.getAllBle(roomId);
         if (listBle==null){
             Log.d("listBle=null","checkLog");
@@ -89,8 +106,14 @@ public class menu_ble extends Activity {
                     startScan();
                 }
                 else {
-                    //send Data
-                    //finish()
+                    try {
+                        new saveBLE().execute().get();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    } catch (ExecutionException e) {
+                        e.printStackTrace();
+                    }
+                    finish();
                 }
             }
         });
@@ -162,6 +185,51 @@ public class menu_ble extends Activity {
                 break;
             case 4: btn1.setText("Send Table Corner");
                 break;
+        }
+    }
+    class saveBLE extends AsyncTask<String,String,String> {
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            pDialog = new ProgressDialog(menu_ble.this);
+            pDialog.setMessage("Sending Ble to Server. Please wait...");
+            pDialog.setIndeterminate(false);
+            pDialog.setCancelable(false);
+            pDialog.show();
+        }
+
+        @Override
+        protected String doInBackground(String... args) {
+            for (int i=0;i<listNearCorner.size();i++) {
+                List<NameValuePair> params = new ArrayList<NameValuePair>();
+                params.add(new BasicNameValuePair("macAddress",listNearCorner.get(i).getMacId()));
+                params.add(new BasicNameValuePair("roomId",String.valueOf(roomId)));
+                params.add(new BasicNameValuePair("positionBle",String.valueOf(listNearCorner.get(i).getPosition())));
+                JSONObject json = jParser.makeHttpRequest(menu_ble.this.getString(R.string.url_save), "POST", params);
+                try {
+                    // Checking for SUCCESS TAG
+                    int success = json.getInt("success");
+                    if (success == 1) {
+                    } else {
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
+            try {
+                new LoadAll(menu_ble.this).execute().get();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
+            pDialog.dismiss();
         }
     }
 }

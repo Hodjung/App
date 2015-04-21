@@ -4,5 +4,7 @@
     <string name="app_name">App</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+    <string name="url_save">http://192.168.137.1/save.php</string>
+    <string name="url_get">http://192.168.137.1/get.php</string>
 
 </resources>

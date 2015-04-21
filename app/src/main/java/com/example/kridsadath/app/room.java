@@ -21,11 +21,10 @@ public class room{
         this.rangeOfDevice=rangeOfDevice;
     }
     public room(String name,String detail,int floorId,boolean isClose,double heightFloor,int width,int height,int rangeOfDevice){
-        this.id=id;
         this.floorId=floorId;
         this.isClose=isClose;
         this.name=name;
-        this.detail=detail;
+        this.detail=detail;//TODO:none
         this.heightFloor=heightFloor;
         this.height=height;
         this.width=width;
