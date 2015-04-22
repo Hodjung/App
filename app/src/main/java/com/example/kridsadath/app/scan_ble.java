@@ -135,7 +135,13 @@ public class scan_ble extends Activity {
                         listSave.add(device.get(j));
                         //db.addBle(new ble(name,roomId,device.get(j).getPosition()));
                         Log.d(name+""+roomId+device.get(j).getPosition(),"checkLog");
-                        new saveBLE();
+                    }
+                    try {
+                        new saveBLE().execute().get();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    } catch (ExecutionException e) {
+                        e.printStackTrace();
                     }
                     finish();
                     //swap_page(RECORD_PAGE);

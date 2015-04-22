@@ -70,7 +70,6 @@ public class menu_ble extends Activity {
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableBtIntent, 1);
         }
-        listNearCorner=null;
         listBle=db.getAllBle(roomId);
         if (listBle==null){
             Log.d("listBle=null","checkLog");
@@ -96,7 +95,7 @@ public class menu_ble extends Activity {
     }
     void corner(){
         noCorner=0;
-        btn1.setVisibility(View.INVISIBLE);
+        //btn1.setVisibility(View.INVISIBLE);
         btn1.setText("Scan BLE At Left-Up");
         btn1.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -106,19 +105,25 @@ public class menu_ble extends Activity {
                     startScan();
                 }
                 else {
-                    try {
-                        new saveBLE().execute().get();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    } catch (ExecutionException e) {
-                        e.printStackTrace();
-                    }
-                    finish();
+                    sendAndFinish();
                 }
             }
         });
         btn2.setVisibility(View.INVISIBLE);
         btn3.setVisibility(View.INVISIBLE);
+    }
+    void sendAndFinish(){
+        Log.d(listNearCorner.size()+" size in button","checkLog");
+        saveBLE saveBLE=new saveBLE();
+        saveBLE.setList(listNearCorner);
+        try {
+            saveBLE.execute().get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+        finish();
     }
     private BluetoothAdapter mBluetoothAdapter;
     private BluetoothAdapter.LeScanCallback mLeScanCallback =new BluetoothAdapter.LeScanCallback() {
@@ -146,20 +151,26 @@ public class menu_ble extends Activity {
     public void addNearlyDevice(String macId){
         int i;
         for (i=0;i<listBle.size();i++){
-            Log.d(macId+" == "+listBle.get(i).getMacId(),"checkLog");
+            //Log.d(macId+" == "+listBle.get(i).getMacId(),"checkLog");
             if (macId.equals(listBle.get(i).getMacId())){
                 break;
             }
         }
         if (i==listBle.size()){
-            int j;
+            int j=0;
+            //Log.d(listNearCorner.size()+" size in function","checkLog");
             for (j=0;j<listNearCorner.size();j++){
+                Log.d(listNearCorner.get(j).getMacId()+" = "+macId,"checkLog");
                 if (listNearCorner.get(j).getMacId().equals(macId)){
                     break;
                 }
             }
             if (j==listNearCorner.size()) {
+                Log.d("Add listNearCorner","checkLog");
                 listNearCorner.add(new nearCorner(macId,roomId,noCorner));
+            }
+            else {
+                Log.d("Not Add listNearCorner","checkLog");
             }
         }
     }
@@ -167,7 +178,8 @@ public class menu_ble extends Activity {
     protected void startScan(){
         //Log.d("Start Scan", log);
         //btn.setText("Stop");
-        listNearCorner=null;
+        countN=0;
+        listNearCorner=new ArrayList<nearCorner>();
         mBluetoothAdapter.startLeScan(mLeScanCallback);
     }
     protected void stopScan(){
@@ -188,6 +200,11 @@ public class menu_ble extends Activity {
         }
     }
     class saveBLE extends AsyncTask<String,String,String> {
+        List<nearCorner> list;
+        public void setList(List<nearCorner> listS){
+            this.list=new ArrayList<>();
+            this.list=listS;
+        }
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
@@ -200,18 +217,19 @@ public class menu_ble extends Activity {
 
         @Override
         protected String doInBackground(String... args) {
-            for (int i=0;i<listNearCorner.size();i++) {
+            Log.d(this.list.size()+" Size of listNearCorner","checkLog");
+            for (int i=0;i<this.list.size();i++) {
                 List<NameValuePair> params = new ArrayList<NameValuePair>();
-                params.add(new BasicNameValuePair("macAddress",listNearCorner.get(i).getMacId()));
-                params.add(new BasicNameValuePair("roomId",String.valueOf(roomId)));
-                params.add(new BasicNameValuePair("positionBle",String.valueOf(listNearCorner.get(i).getPosition())));
+                params.add(new BasicNameValuePair("macAddress",this.list.get(i).getMacId()));
+                params.add(new BasicNameValuePair("roomId",String.valueOf(this.list.get(i).getRoomId())));
+                params.add(new BasicNameValuePair("positionCorner",String.valueOf(this.list.get(i).getPosition())));
                 JSONObject json = jParser.makeHttpRequest(menu_ble.this.getString(R.string.url_save), "POST", params);
                 try {
                     // Checking for SUCCESS TAG
                     int success = json.getInt("success");
-                    if (success == 1) {
+                    /*if (success == 1) {
                     } else {
-                    }
+                    }*/
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
