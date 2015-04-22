@@ -37,7 +37,7 @@ class LoadAll extends AsyncTask<String,String,String> {
         db = new Database(context);
         mDb=db.getWritableDatabase();
         db.onUpgrade(mDb,1,1);
-        super.onPreExecute();
+        //super.onPreExecute();
         pDialog = new ProgressDialog(this.context);
         pDialog.setMessage("Loading All. Please wait...");
         pDialog.setIndeterminate(false);
