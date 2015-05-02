@@ -38,8 +38,6 @@ public class create_page extends Activity {
     private List<floor> floor;
     ListView listView;
     ArrayAdapter<String> adapter;
-    private ProgressDialog pDialog;
-    JSONParser jParser = new JSONParser();
     //JSONArray products = null;
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -55,7 +53,8 @@ public class create_page extends Activity {
         Log.d("before set view",log);
         setView();
         final AlertDialog.Builder boxOption = new AlertDialog.Builder(this);
-        final String[] option_header = new String[] { "Manage", "Rename" };
+        //final String[] option_header = new String[] { "Manage", "Rename" };
+        final String[] option_header = new String[] { "Manage" };
         final ArrayAdapter<String> option = new ArrayAdapter<String>(this,android.R.layout.select_dialog_item, option_header);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -84,12 +83,7 @@ public class create_page extends Activity {
         btn_confirm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //Add all to database server
-                //new CreatePlace().execute();
-                //Check Exist In Database***
-                //If not ,Create***
-                //Else Update***
-                Intent intent=new Intent(create_page.this,MainActivity.class);
+                Intent intent=new Intent(create_page.this,place_page.class);
                 startActivity(intent);
                 finish();
             }
@@ -121,65 +115,6 @@ public class create_page extends Activity {
             }
         });
     }
-
-    /*class CreateCorner extends AsyncTask<String,String,String>{
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            pDialog = new ProgressDialog(create_page.this);
-            pDialog.setMessage("Sending Corner to Server. Please wait...");
-            pDialog.setIndeterminate(false);
-            pDialog.setCancelable(false);
-            pDialog.show();
-        }
-
-        @Override
-        protected String doInBackground(String... args) {
-            List<floor> listFloor=new ArrayList<floor>();
-            listFloor=db.getAllFloor(currentBuilding.getId());
-            if (listFloor!=null) {
-                for (int i = 0; i < listFloor.size(); i++) {
-                    List<room> listRoom = new ArrayList<room>();
-                    listRoom = db.getAllRoom(listFloor.get(i).getId());
-                    if (listRoom != null) {
-                        for (int j = 0; j < listRoom.size(); j++) {
-                            List<corner> listCorner=new ArrayList<corner>();
-                            listCorner=db.getCorner(listRoom.get(j).getId());
-                            if (listCorner!=null){
-                                for (int k=0;k<listCorner.size();k++){
-                                    List<NameValuePair> params_corner = new ArrayList<NameValuePair>();
-                                    params_corner.add(new BasicNameValuePair("roomId", String.valueOf(listCorner.get(k).getRoomId())));
-                                    params_corner.add(new BasicNameValuePair("noCorner", String.valueOf(listCorner.get(k).getRoomId())));
-                                    params_corner.add(new BasicNameValuePair("x", String.valueOf(listCorner.get(i).getX())));
-                                    params_corner.add(new BasicNameValuePair("y", String.valueOf(listCorner.get(i).getY())));
-                                    // getting JSON Object
-                                    // Note that create product url accepts POST method
-                                    JSONObject json_corner = jParser.makeHttpRequest(url_save, "POST", params_corner);
-                                    try {
-                                        // Checking for SUCCESS TAG
-                                        int success = json_corner.getInt("success");
-                                        if (success == 1) {
-                                        } else {
-                                        }
-                                    } catch (JSONException e) {
-                                        e.printStackTrace();
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(String s) {
-            pDialog.dismiss();
-            //new CreatePin().execute();
-        }
-    }
-*/
     void boxRename (final floor floor){
         AlertDialog.Builder renameBox = new AlertDialog.Builder(this);
         renameBox.setTitle("Rename " + floor.getName());
@@ -190,9 +125,9 @@ public class create_page extends Activity {
         renameBox.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                floor.setName(input.getText().toString());
+                /*floor.setName(input.getText().toString());
                 db.updateFloor(floor);
-                setView();
+                setView();*/
             }
         });
         renameBox.setNegativeButton("Cancel",new DialogInterface.OnClickListener() {

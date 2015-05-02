@@ -4,6 +4,8 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
+import android.util.Log;
+import android.widget.Toast;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
@@ -20,7 +22,6 @@ import java.util.List;
 public class newFloor extends AsyncTask<String,String,String> {
     int numFloor,buildingId;
     Context context;
-    private ProgressDialog pDialog;
     private static final String TAG_SUCCESS = "success";
     // products JSONArray
     JSONArray all = null;
@@ -38,36 +39,41 @@ public class newFloor extends AsyncTask<String,String,String> {
     protected void onPreExecute() {
         db = new Database(context);
         super.onPreExecute();
-        pDialog = new ProgressDialog(this.context);
-        pDialog.setMessage("Create Floor. Please wait...");
-        pDialog.setIndeterminate(false);
-        pDialog.setCancelable(false);
-        pDialog.show();
     }
 
     @Override
     protected String doInBackground(String... args) {
+        List<NameValuePair> root_params=new ArrayList<>();
+        root_params.add(new BasicNameValuePair("buildingId", String.valueOf(buildingId)));
+        root_params.add(new BasicNameValuePair("saveFloor",String.valueOf(numFloor)));
         for (int i=0;i<numFloor;i++) {
-            List<NameValuePair> params_floor = new ArrayList<NameValuePair>();
-            params_floor.add(new BasicNameValuePair("name","Floor "+String.valueOf(i+1)));
-            params_floor.add(new BasicNameValuePair("buildingId", String.valueOf(buildingId)));
-            // getting JSON Object
-            // Note that create product url accepts POST method
-            JSONObject json_floor = jParser.makeHttpRequest(context.getString(R.string.url_save), "POST", params_floor);
+            root_params.add(new BasicNameValuePair("name".concat(String.valueOf(i)),"Floor ".concat(String.valueOf(i+1))));
+        }
+        Log.d(root_params.toString(),"checkLog");
+        JSONObject json_floor = jParser.makeHttpRequest(context.getString(R.string.url_save), "POST", root_params);
+        if (json_floor!=null) {
             try {
                 // Checking for SUCCESS TAG
                 int success = json_floor.getInt("success");
-                if (success == 1){}
-                else {}
-            } catch (JSONException e){
-                e.printStackTrace();
+                if (success == 1) {
+                    Log.d(json_floor.toString(), "checkLog");
+                } else {
+                    Log.d(json_floor.toString(), "checkLog");
+                }
+            } catch (JSONException e) {
+                Toast toast = new Toast(context);
+                toast.setText("Please check internet connection");
+                toast.setDuration(Toast.LENGTH_SHORT);
+                toast.show();
+                //e.printStackTrace();
             }
         }
-        return null;
+        else return "FAIL";
+        return "OK";
     }
 
     @Override
     protected void onPostExecute(String s) {
-        pDialog.dismiss();
+
     }
 }

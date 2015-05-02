@@ -91,7 +91,7 @@ final class Database extends SQLiteOpenHelper {
         db.execSQL(CREATE_FLOOR_TABLE);
 
         String CREATE_ROOM_TABLE = "CREATE TABLE IF NOT EXISTS " + TABLE_ROOM + "("+KEY_ID+" INTEGER PRIMARY KEY AUTOINCREMENT,"+KEY_NAME+
-                " TEXT,"+KEY_DETAIL+" TEXT,"+KEY_HEIGHT+" INTEGER,"+KEY_IS_CLOSE+" BOOLEAN,"+KEY_WIDTH+" INTEGER,"+KEY_DEPTH+
+                " TEXT,"+KEY_DETAIL+" TEXT,"+KEY_HEIGHT+" INTEGER,"+KEY_IS_CLOSE+" TEXT,"+KEY_WIDTH+" INTEGER,"+KEY_DEPTH+
                 " INTEGER,"+KEY_RANGE+" INTEGER,"+KEY_FLOOR_ID+" INTEGER)";
         db.execSQL(CREATE_ROOM_TABLE);
 
@@ -268,7 +268,7 @@ final class Database extends SQLiteOpenHelper {
         Cursor cursor = db.rawQuery(selectQuery,new String[]{String.valueOf(id)});
         if (cursor.moveToFirst()){
             room get_room = new room(Integer.parseInt(cursor.getString(0)),cursor.getString(1),cursor.getString(2),Integer.parseInt(cursor.getString(8)),
-                    Boolean.parseBoolean(cursor.getString(4)),Double.parseDouble(cursor.getString(3)),
+                    cursor.getString(4),Double.parseDouble(cursor.getString(3)),
                     Integer.parseInt(cursor.getString(5)),Integer.parseInt(cursor.getString(6)),
                     Integer.parseInt(cursor.getString(7)));
             return get_room;
@@ -295,7 +295,7 @@ final class Database extends SQLiteOpenHelper {
                 //name,detail,floorId,isClose,heightFloor,width,height,rangeOfDevice
                 //String,String,int,boolean,double,int,int,int
                 room room = new room(Integer.parseInt(cursor.getString(0)),cursor.getString(1),cursor.getString(2),Integer.parseInt(cursor.getString(8)),
-                        Boolean.parseBoolean(cursor.getString(4)),Double.parseDouble(cursor.getString(3)),
+                        cursor.getString(4),Double.parseDouble(cursor.getString(3)),
                         Integer.parseInt(cursor.getString(5)),Integer.parseInt(cursor.getString(6)),
                         Integer.parseInt(cursor.getString(7)));
                 // Adding floor to list
@@ -428,7 +428,7 @@ final class Database extends SQLiteOpenHelper {
                 KEY_ID + "=?",new String[] { String.valueOf(id) }, null, null, null, null);*/
         if (cursor.moveToFirst()){
             Log.d("NOT NULL"+selectQuery,"checkLog");
-            Log.d("data:"+cursor.getString(0)+cursor.getString(1)+cursor.getString(2)+cursor.getString(3),"checkLog");
+            Log.d("data:"+cursor.getString(0)+" "+cursor.getString(1)+" "+cursor.getString(2)+" "+cursor.getString(3),"checkLog");
             return new building(Integer.parseInt(cursor.getString(0)),cursor.getString(1),Float.parseFloat(cursor.getString(2)),Float.parseFloat(cursor.getString(3)));
         }
         else {

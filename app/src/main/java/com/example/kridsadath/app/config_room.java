@@ -31,9 +31,6 @@ public class config_room extends Activity {
     int buildingId,floorId;
     floor currentFloor;
     room currentRoom;
-    Database db;
-    private ProgressDialog pDialog;
-    JSONParser jParser = new JSONParser();
     public config_room(){}
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,11 +48,10 @@ public class config_room extends Activity {
         type.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                TextView roomName = (TextView)findViewById(R.id.roomName);
-                if (isChecked){
+                TextView roomName = (TextView) findViewById(R.id.roomName);
+                if (isChecked) {
                     roomName.setVisibility(View.VISIBLE);
-                }
-                else {
+                } else {
                     roomName.setVisibility(View.INVISIBLE);
                 }
             }
@@ -64,42 +60,15 @@ public class config_room extends Activity {
         next.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                CheckBox checkBox=(CheckBox)findViewById(R.id.openOrClose);
-                EditText name=(EditText)findViewById(R.id.roomName);
                 EditText heightFloor=(EditText)findViewById(R.id.floorHeight);
                 EditText width=(EditText)findViewById(R.id.width);
                 EditText height=(EditText)findViewById(R.id.height);
                 EditText range=(EditText)findViewById(R.id.range);
-                if (!checkBox.isChecked())name.setText("Path");
-                if (!heightFloor.getText().toString().isEmpty()||
-                        !width.getText().toString().isEmpty()||
-                        !height.getText().toString().isEmpty()||
+                if (!heightFloor.getText().toString().isEmpty()&&
+                        !width.getText().toString().isEmpty()&&
+                        !height.getText().toString().isEmpty()&&
                         !range.getText().toString().isEmpty()) {
-                    currentRoom = new room(name.getText().toString(),"Coming Soon", currentFloor.getId(), checkBox.isChecked()
-                            , Float.parseFloat(heightFloor.getText().toString()), Integer.parseInt(width.getText().toString())
-                            , Integer.parseInt(height.getText().toString()), Integer.parseInt(range.getText().toString()));
-                    //currentRoom.setId(db.addRoom(currentRoom));
-                    try {
-                        new newRoom().execute().get();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    } catch (ExecutionException e) {
-                        e.printStackTrace();
-                    }
-                    try {
-                        new LoadAll(config_room.this).execute().get();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    } catch (ExecutionException e) {
-                        e.printStackTrace();
-                    }
-                    Intent myIntent=new Intent(config_room.this,record_page.class);
-                    myIntent.putExtra("buildingId",String.valueOf(buildingId));
-                    myIntent.putExtra("floorId",String.valueOf(floorId));
-                    myIntent.putExtra("roomId",String.valueOf(currentRoom.getId()));
-                    Log.d("buildingId="+buildingId+" floorId="+floorId+" roomId="+currentRoom.getId(),"checkLog");
-                    startActivity(myIntent);
-                    finish();
+                    add();
                 }
             }
         });
@@ -115,49 +84,54 @@ public class config_room extends Activity {
             }
         });
     }
-    class newRoom extends AsyncTask<String,String,String> {
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            pDialog = new ProgressDialog(config_room.this);
-            pDialog.setMessage("Sending Room to Server. Please wait...");
-            pDialog.setIndeterminate(false);
-            pDialog.setCancelable(false);
-            pDialog.show();
+    public void add(){
+        boolean isError=false;
+        CheckBox checkBox=(CheckBox)findViewById(R.id.openOrClose);
+        EditText name=(EditText)findViewById(R.id.roomName);
+        EditText heightFloor=(EditText)findViewById(R.id.floorHeight);
+        EditText width=(EditText)findViewById(R.id.width);
+        EditText height=(EditText)findViewById(R.id.height);
+        EditText range=(EditText)findViewById(R.id.range);
+        int isclose;
+        String nameR;
+        if (!checkBox.isChecked()) {
+            nameR="Path";
+            isclose = 0;
         }
-
-        @Override
-        protected String doInBackground(String... args) {
-            List<NameValuePair> params_room = new ArrayList<NameValuePair>();
-            params_room.add(new BasicNameValuePair("name", currentRoom.getName()));
-            params_room.add(new BasicNameValuePair("detail", currentRoom.getDetail()));
-            params_room.add(new BasicNameValuePair("height", String.valueOf(currentRoom.getHeightFloor())));
-            params_room.add(new BasicNameValuePair("isClose", String.valueOf(currentRoom.getIsClose())));
-            params_room.add(new BasicNameValuePair("width", String.valueOf(currentRoom.getWidth())));
-            params_room.add(new BasicNameValuePair("depth", String.valueOf(currentRoom.getHeight())));
-            params_room.add(new BasicNameValuePair("range", String.valueOf(currentRoom.getRange())));
-            params_room.add(new BasicNameValuePair("floorId", String.valueOf(currentRoom.getFloorId())));
-            // getting JSON Object
-            // Note that create product url accepts POST method
-            Log.d("checkLog",params_room.toString());
-            JSONObject json_room = jParser.makeHttpRequest(config_room.this.getString(R.string.url_save), "POST", params_room);
-            Log.d("checkLog", String.valueOf(json_room));
-            try {
-                // Checking for SUCCESS TAG
-                int success = json_room.getInt("success");
-                currentRoom.setId(json_room.getInt("lastId"));
-                if (success == 1) {
-                } else {
-                }
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-            return null;
+        else {
+            nameR=name.getText().toString();
+            isclose=1;
         }
-
-        @Override
-        protected void onPostExecute(String s) {
-            pDialog.dismiss();
+        currentRoom = new room(nameR,"Coming Soon", currentFloor.getId(), String.valueOf(isclose)
+                , Float.parseFloat(heightFloor.getText().toString()), Integer.parseInt(width.getText().toString())
+                , Integer.parseInt(height.getText().toString()), Integer.parseInt(range.getText().toString()));
+        newRoom newRoom=new newRoom(config_room.this,currentRoom);
+        try {
+            String check;
+            check=newRoom.execute().get();
+            if (!check.equals("OK"))isError=true;
+        } catch (InterruptedException e) {
+            Log.e("error","Interrupted");
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            Log.e("error","Execution");
+            e.printStackTrace();
+        }
+        try {
+            new LoadAll(config_room.this).execute().get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+        if (!isError) {
+            Intent myIntent = new Intent(config_room.this, record_page.class);
+            myIntent.putExtra("buildingId", String.valueOf(buildingId));
+            myIntent.putExtra("floorId", String.valueOf(floorId));
+            myIntent.putExtra("roomId", String.valueOf(newRoom.getId()));
+            Log.d("buildingId=" + buildingId + " floorId=" + floorId + " roomId=" + currentRoom.getId(), "checkLog");
+            startActivity(myIntent);
+            finish();
         }
     }
 }

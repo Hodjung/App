@@ -5,11 +5,10 @@ package com.example.kridsadath.app;
  */
 public class room{
     int id,floorId;
-    boolean isClose;
     double heightFloor;
     int width,height,rangeOfDevice;
-    String name,detail;
-    public room(int id,String name,String detail,int floorId,boolean isClose,double heightFloor,int width,int height,int rangeOfDevice){
+    String name,detail,isClose;
+    public room(int id,String name,String detail,int floorId,String isClose,double heightFloor,int width,int height,int rangeOfDevice){
         this.id=id;
         this.floorId=floorId;
         this.isClose=isClose;
@@ -20,7 +19,7 @@ public class room{
         this.width=width;
         this.rangeOfDevice=rangeOfDevice;
     }
-    public room(String name,String detail,int floorId,boolean isClose,double heightFloor,int width,int height,int rangeOfDevice){
+    public room(String name,String detail,int floorId,String isClose,double heightFloor,int width,int height,int rangeOfDevice){
         this.floorId=floorId;
         this.isClose=isClose;
         this.name=name;
@@ -36,9 +35,7 @@ public class room{
     void setId(int id){this.id=id;}
     void setName(String name){this.name=name;}
     public int getIsClose() {
-        if (this.isClose==true)
-            return 1;
-        return 0;
+        return Integer.parseInt(this.isClose);
     }
     public double getHeightFloor() {return this.heightFloor;}
     public int getWidth() {return this.width;}

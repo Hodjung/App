@@ -59,6 +59,7 @@ public class menu_ble extends Activity {
         text.add((TextView) findViewById(R.id.textView2));
         text.add((TextView) findViewById(R.id.textView3));
         text.add((TextView) findViewById(R.id.textView4));
+        listNearCorner=new ArrayList<nearCorner>();
         db=new Database(this);
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         if (mBluetoothAdapter==null){
@@ -115,16 +116,19 @@ public class menu_ble extends Activity {
     void sendAndFinish(){
         Log.d(listNearCorner.size()+" size in button","checkLog");
         saveBLE saveBLE=new saveBLE();
-        saveBLE.setList(listNearCorner);
+        //saveBLE.setList(listNearCorner);
         try {
-            saveBLE.execute().get();
+            String check;
+            check=saveBLE.execute().get();
+            if (check.equals("OK"))
+                finish();
         } catch (InterruptedException e) {
             e.printStackTrace();
         } catch (ExecutionException e) {
             e.printStackTrace();
         }
-        finish();
     }
+    private boolean isFinish;
     private BluetoothAdapter mBluetoothAdapter;
     private BluetoothAdapter.LeScanCallback mLeScanCallback =new BluetoothAdapter.LeScanCallback() {
         @Override
@@ -135,12 +139,27 @@ public class menu_ble extends Activity {
                     if (device.getName()!=null) {
                             if (device.getName().equals("UT9")) {
                                 countN++;
-                                text.get(noCorner).setText("Scanning ... "+countN+" %");
-                                addNearlyDevice(device.getAddress());
-                                if (countN>99) {
+                                if (noCorner<4&&!isFinish) {
+                                    text.get(noCorner).setText("Scanning ... " + countN + " %");
+                                    addNearlyDevice(device.getAddress(), rssi);
+                                }
+                                if (countN>99&&!isFinish&&noCorner<4) {
+                                    isFinish=true;
+                                    stopScan();
                                     text.get(noCorner).setText("Position : "+noCorner+" Finish");
                                     noCorner++;
-                                    stopScan();
+                                    switch (noCorner){
+                                        case 0: btn1.setText("Scan BLE At Left-Up");
+                                            break;
+                                        case 1: btn1.setText("Scan BLE At Right-Up");
+                                            break;
+                                        case 2: btn1.setText("Scan BLE At Right-Down");
+                                            break;
+                                        case 3: btn1.setText("Scan BLE At Left-Down");
+                                            break;
+                                        default: btn1.setText("Send Table Corner");
+                                            break;
+                                    }
                                 }
                             }
                     }
@@ -148,29 +167,30 @@ public class menu_ble extends Activity {
             });
         }
     };
-    public void addNearlyDevice(String macId){
+    public void addNearlyDevice(String macId,int rssi){
         int i;
-        for (i=0;i<listBle.size();i++){
-            //Log.d(macId+" == "+listBle.get(i).getMacId(),"checkLog");
-            if (macId.equals(listBle.get(i).getMacId())){
-                break;
-            }
-        }
-        if (i==listBle.size()){
-            int j=0;
-            //Log.d(listNearCorner.size()+" size in function","checkLog");
-            for (j=0;j<listNearCorner.size();j++){
-                Log.d(listNearCorner.get(j).getMacId()+" = "+macId,"checkLog");
-                if (listNearCorner.get(j).getMacId().equals(macId)){
+        if (rssi>-80) {
+            for (i = 0; i < listBle.size(); i++) {
+                //Log.d(macId+" == "+listBle.get(i).getMacId(),"checkLog");
+                if (macId.equals(listBle.get(i).getMacId())) {
                     break;
                 }
             }
-            if (j==listNearCorner.size()) {
-                Log.d("Add listNearCorner","checkLog");
-                listNearCorner.add(new nearCorner(macId,roomId,noCorner));
-            }
-            else {
-                Log.d("Not Add listNearCorner","checkLog");
+            if (i == listBle.size()) {
+                int j = 0;
+                //Log.d(listNearCorner.size()+" size in function","checkLog");
+                for (j = 0; j < listNearCorner.size(); j++) {
+                    Log.d(listNearCorner.get(j).getMacId() + " = " + macId, "checkLog");
+                    if (listNearCorner.get(j).getMacId().equals(macId) && listNearCorner.get(j).getPosition() == noCorner) {
+                        break;
+                    }
+                }
+                if (j == listNearCorner.size()) {
+                    Log.d("Add listNearCorner", "checkLog");
+                    listNearCorner.add(new nearCorner(macId, roomId, noCorner));
+                } else {
+                    Log.d("Not Add listNearCorner", "checkLog");
+                }
             }
         }
     }
@@ -179,32 +199,15 @@ public class menu_ble extends Activity {
         //Log.d("Start Scan", log);
         //btn.setText("Stop");
         countN=0;
-        listNearCorner=new ArrayList<nearCorner>();
+        isFinish=false;
         mBluetoothAdapter.startLeScan(mLeScanCallback);
     }
     protected void stopScan(){
         //Log.d("Stop Scan",log);
         //btn.setText("Start");
         mBluetoothAdapter.stopLeScan(mLeScanCallback);
-        switch (noCorner){
-            case 0: btn1.setText("Scan BLE At Left-Up");
-                break;
-            case 1: btn1.setText("Scan BLE At Right-Up");
-                break;
-            case 2: btn1.setText("Scan BLE At Right-Down");
-                break;
-            case 3: btn1.setText("Scan BLE At Left-Down");
-                break;
-            case 4: btn1.setText("Send Table Corner");
-                break;
-        }
     }
     class saveBLE extends AsyncTask<String,String,String> {
-        List<nearCorner> list;
-        public void setList(List<nearCorner> listS){
-            this.list=new ArrayList<>();
-            this.list=listS;
-        }
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
@@ -217,16 +220,20 @@ public class menu_ble extends Activity {
 
         @Override
         protected String doInBackground(String... args) {
-            Log.d(this.list.size()+" Size of listNearCorner","checkLog");
-            for (int i=0;i<this.list.size();i++) {
-                List<NameValuePair> params = new ArrayList<NameValuePair>();
-                params.add(new BasicNameValuePair("macAddress",this.list.get(i).getMacId()));
-                params.add(new BasicNameValuePair("roomId",String.valueOf(this.list.get(i).getRoomId())));
-                params.add(new BasicNameValuePair("positionCorner",String.valueOf(this.list.get(i).getPosition())));
-                JSONObject json = jParser.makeHttpRequest(menu_ble.this.getString(R.string.url_save), "POST", params);
+            Log.d(listNearCorner.size()+" Size of listNearCorner","checkLog");
+            List<NameValuePair> root_params=new ArrayList<NameValuePair>();
+            root_params.add(new BasicNameValuePair("roomId",String.valueOf(roomId)));
+            root_params.add(new BasicNameValuePair("saveCorner",String.valueOf(listNearCorner.size())));
+            for (int i=0;i<listNearCorner.size();i++) {
+                root_params.add(new BasicNameValuePair("macAddress".concat(String.valueOf(i)),listNearCorner.get(i).getMacId()));
+                root_params.add(new BasicNameValuePair("positionCorner".concat(String.valueOf(i)),String.valueOf(listNearCorner.get(i).getPosition())));
+            }
+            JSONObject json = jParser.makeHttpRequest(menu_ble.this.getString(R.string.url_save), "POST", root_params);
+            if (json!=null) {
                 try {
                     // Checking for SUCCESS TAG
                     int success = json.getInt("success");
+                    Log.i("checkLog",json.toString());
                     /*if (success == 1) {
                     } else {
                     }*/
@@ -234,7 +241,8 @@ public class menu_ble extends Activity {
                     e.printStackTrace();
                 }
             }
-            return null;
+            else return "FAIL";
+            return "OK";
         }
 
         @Override

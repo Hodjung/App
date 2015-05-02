@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.List;
 
 import org.apache.http.HttpEntity;
@@ -15,23 +17,30 @@ import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpGet;
+//import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.app.Activity;
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.util.Log;
 
-public class JSONParser {
+public class JSONParser{
 
     static InputStream is = null;
     static JSONObject jObj = null;
     static String json = "";
+    Context context;
     // constructor
-    public JSONParser() {}
-
+    public JSONParser() {
+    }
     // function get json from url
     // by making HTTP POST or GET mehtod
     public JSONObject makeHttpRequest(String url, String method,List<NameValuePair> params) {
@@ -42,14 +51,28 @@ public class JSONParser {
                 // request method is POST
                 // defaultHttpClient
                 DefaultHttpClient httpClient = new DefaultHttpClient();
+                HttpParams httpParameters = httpClient.getParams();
+                HttpConnectionParams.setConnectionTimeout(httpParameters,3000);
+                HttpConnectionParams.setSoTimeout(httpParameters,5000);
+                //HttpConnectionParams.setTcpNoDelay(httpParameters, true);
                 HttpPost httpPost = new HttpPost(url);
                 httpPost.setEntity(new UrlEncodedFormEntity(params));
 
-                HttpResponse httpResponse = httpClient.execute(httpPost);
+                Log.d(System.currentTimeMillis() + "", "checkLog");// Log to know the time diff
+                //
+                /*URL uri = new URL(url);
+                HttpURLConnection connection = (HttpURLConnection)uri.openConnection();
+                connection.setRequestMethod("POST");
+                connection.setDoInput(true);
+                connection.connect();*/
+                //
+                HttpResponse httpResponse;
+                httpResponse = httpClient.execute(httpPost);
+                Log.d(System.currentTimeMillis()+"","checkLog");// Log to know the time diff
                 HttpEntity httpEntity = httpResponse.getEntity();
                 is = httpEntity.getContent();
 
-            }else if(method.equals("GET")){
+            }/*else if(method.equals("GET")){
                 // request method is GET
                 DefaultHttpClient httpClient = new DefaultHttpClient();
                 String paramString = URLEncodedUtils.format(params, "utf-8");
@@ -59,14 +82,19 @@ public class JSONParser {
                 HttpResponse httpResponse = httpClient.execute(httpGet);
                 HttpEntity httpEntity = httpResponse.getEntity();
                 is = httpEntity.getContent();
-            }
-
+            }*/
         } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+            Log.d("First catch","checkLog");
+            return null;
+            //e.printStackTrace();
         } catch (ClientProtocolException e) {
-            e.printStackTrace();
+            Log.d("Second catch","checkLog");
+            return null;
+            //e.printStackTrace();
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.d("Third catch","checkLog");
+            return null;
+            //e.printStackTrace();
         }
 
         try {

@@ -73,7 +73,8 @@ public class manage_floor extends Activity {
     protected void initPageRoom(){
         Log.d("initPageRoom","checkLog");
         final AlertDialog.Builder boxOption = new AlertDialog.Builder(this);
-        final String[] option_header = new String[] { "Manage", "Rename", "Delete" };
+        final String[] option_header = new String[] { "Manage" };
+        //final String[] option_header = new String[] { "Manage", "Rename", "Delete" };
         final ArrayAdapter<String> option = new ArrayAdapter<String>(this,android.R.layout.select_dialog_item, option_header);
         adapterRoom = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,android.R.id.text1,group);
         planRoom.setAdapter(adapterRoom);

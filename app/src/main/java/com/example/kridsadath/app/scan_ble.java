@@ -12,6 +12,7 @@ import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.Display;
 import android.view.View;
@@ -136,14 +137,7 @@ public class scan_ble extends Activity {
                         //db.addBle(new ble(name,roomId,device.get(j).getPosition()));
                         Log.d(name+""+roomId+device.get(j).getPosition(),"checkLog");
                     }
-                    try {
-                        new saveBLE().execute().get();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    } catch (ExecutionException e) {
-                        e.printStackTrace();
-                    }
-                    finish();
+                    send();
                     //swap_page(RECORD_PAGE);
                 }
             }
@@ -190,36 +184,59 @@ public class scan_ble extends Activity {
             }
         }
     }
+    public void send(){
+        try {
+            String check;
+            check=new saveBLE().execute().get();
+            if (check.equals("OK"))
+                finish();
+            else Toast.makeText(scan_ble.this,"Error sending",Toast.LENGTH_SHORT);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+        /*List<NameValuePair> root_params=new ArrayList<NameValuePair>();
+        JSONObject json = jParser.makeHttpRequest(scan_ble.this.getString(R.string.url_save), "POST", root_params);*/
+    }
     class saveBLE extends AsyncTask<String,String,String>{
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
             pDialog = new ProgressDialog(scan_ble.this);
-            pDialog.setMessage("Sending Ble to Server. Please wait...");
-            pDialog.setIndeterminate(false);
+            pDialog.setMessage("Loading All. Please wait...");
+            pDialog.setIndeterminate(true);
             pDialog.setCancelable(false);
             pDialog.show();
         }
 
         @Override
         protected String doInBackground(String... args) {
+            List<NameValuePair> root_params=new ArrayList<NameValuePair>();
+            root_params.add(new BasicNameValuePair("roomId",String.valueOf(roomId)));
+            root_params.add(new BasicNameValuePair("saveBle",String.valueOf(listSave.size())));
             for (int i=0;i<listSave.size();i++) {
-                List<NameValuePair> params = new ArrayList<NameValuePair>();
-                params.add(new BasicNameValuePair("macAddress",listSave.get(i).getMacId()));
-                params.add(new BasicNameValuePair("roomId",String.valueOf(roomId)));
-                params.add(new BasicNameValuePair("positionBle",listSave.get(i).getPosition()));
-                JSONObject json = jParser.makeHttpRequest(scan_ble.this.getString(R.string.url_save), "POST", params);
+                root_params.add(new BasicNameValuePair("macAddress".concat(String.valueOf(i)),listSave.get(i).getMacId()));
+                root_params.add(new BasicNameValuePair("positionBle".concat(String.valueOf(i)), listSave.get(i).getPosition()));
+            }
+            JSONObject json = jParser.makeHttpRequest(scan_ble.this.getString(R.string.url_save), "POST", root_params);
+            if (json!=null) {
                 try {
                     // Checking for SUCCESS TAG
                     int success = json.getInt("success");
-                    /*if (success == 1) {
+                    if (success == 1) {
+                        Log.d("Success=1", "checkLog");
                     } else {
-                    }*/
+                        Log.d("Success=other", "checkLog");
+                    }
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
             }
-            return null;
+            else {
+                return "FAIL";
+            }
+            return "OK";
         }
 
         @Override

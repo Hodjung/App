@@ -54,7 +54,7 @@ public class place_page extends Activity {
         refresh.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent myIntent=new Intent(place_page.this,place_page.class);
+                Intent myIntent=new Intent(place_page.this,MainActivity.class);
                 startActivity(myIntent);
                 finish();
             }
@@ -62,13 +62,7 @@ public class place_page extends Activity {
         buildingView = (ListView)findViewById(R.id.listView);
         //Load all from database server
         // Loading products in Background Thread
-        try {
-            new LoadAll(this).execute().get();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        }
+
         initPlace();
         initPagePlace();
     }

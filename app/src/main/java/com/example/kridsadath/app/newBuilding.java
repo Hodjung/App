@@ -4,6 +4,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
+import android.widget.Toast;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
@@ -19,27 +20,29 @@ import java.util.List;
  */
 class newBuilding extends AsyncTask<String,String,String> {
     String name;
+    int id;
     float latitude,longitude;
     Context context;
-    private ProgressDialog pDialog;
-    private static final String TAG_SUCCESS = "success";
     // products JSONArray
     JSONArray all = null;
     // Creating JSON Parser object
     JSONParser jParser = new JSONParser();
-    Database db;
+    ProgressDialog pDialog;
     public newBuilding(Context context,String name,float latitude,float longitude) {
         this.context=context;
         this.name=name;
         this.latitude=latitude;
         this.longitude=longitude;
+        this.id=0;
+    }
+    public int getId(){
+        return this.id;
     }
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
-        db = new Database(context);
-        pDialog = new ProgressDialog(this.context);
-        pDialog.setMessage("Create Building. Please wait...");
+        pDialog = new ProgressDialog(context);
+        pDialog.setMessage("Sending to server. Please wait...");
         pDialog.setIndeterminate(false);
         pDialog.setCancelable(false);
         pDialog.show();
@@ -56,21 +59,30 @@ class newBuilding extends AsyncTask<String,String,String> {
         JSONObject json = jParser.makeHttpRequest(context.getString(R.string.url_save), "POST", params);
         //Log.d(json.toString(),"checkLog");
         // Check your log cat for JSON reponse
-        try {
-            // Checking for SUCCESS TAG
-            //int success = json.getInt("success");
-            return json.getString("id");
-            /*if (success == 1){}
-            else {}*/
-        } catch (JSONException e){
-            e.printStackTrace();
+        if (json!=null) {
+            try {
+                // Checking for SUCCESS TAG
+                int success = json.getInt("success");
+                if (success == 1) {
+                    this.id = Integer.parseInt(json.getString("lastId"));
+                } else {
+                    this.id = 0;
+                }
+            } catch (JSONException e) {
+                Toast toast = new Toast(context);
+                toast.setText("Please check internet connection");
+                toast.setDuration(Toast.LENGTH_SHORT);
+                toast.show();
+                //e.printStackTrace();
+            }
         }
-        return null;
+        else {
+            return "ERROR";
+        }
+        return "OK";
     }
     @Override
     protected void onPostExecute(String s) {
-        db.close();
-        // dismiss the dialog after getting all products
         pDialog.dismiss();
     }
 }
